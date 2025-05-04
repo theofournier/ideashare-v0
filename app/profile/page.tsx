@@ -1,38 +1,39 @@
-import { redirect } from "next/navigation"
+"use client"
+
+import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { IdeaCard } from "@/components/idea-card"
+import { ideas, userIdeas, userVotes, currentUser } from "@/lib/mock-data"
 import { User } from "lucide-react"
-import { getSession, getUserDetails } from "@/lib/supabase-server"
-import { getUserIdeas, getUserVotes } from "@/lib/actions"
-import { ProfileIdeas } from "@/components/profile-ideas"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export default async function ProfilePage() {
-  const session = await getSession()
+export default function ProfilePage() {
+  const [upvotedIdeas, setUpvotedIdeas] = useState<string[]>(userVotes[currentUser.id] || [])
 
-  if (!session) {
-    redirect("/login")
+  const userSubmittedIdeas = ideas.filter((idea) => userIdeas[currentUser.id]?.includes(idea.id))
+
+  const userLikedIdeas = ideas.filter((idea) => upvotedIdeas.includes(idea.id))
+
+  const handleUpvote = (ideaId: string) => {
+    // Toggle upvote
+    if (upvotedIdeas.includes(ideaId)) {
+      setUpvotedIdeas(upvotedIdeas.filter((id) => id !== ideaId))
+    } else {
+      setUpvotedIdeas([...upvotedIdeas, ideaId])
+    }
   }
-
-  const userDetails = await getUserDetails()
-  const userSubmittedIdeas = await getUserIdeas(session.user.id)
-  const userVotedIdeas = await getUserVotes(session.user.id)
 
   return (
     <div>
       <div className="mb-8 flex flex-col items-center justify-center">
         <Avatar className="mb-4 h-24 w-24">
-          <AvatarImage
-            src={userDetails?.avatar_url || "/placeholder.svg?height=96&width=96"}
-            alt={userDetails?.full_name || ""}
-          />
+          <AvatarImage src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.name} />
           <AvatarFallback>
             <User className="h-12 w-12" />
           </AvatarFallback>
         </Avatar>
-        <h1 className="text-2xl font-bold">
-          {userDetails?.full_name || userDetails?.username || session.user.email?.split("@")[0]}
-        </h1>
-        <p className="text-muted-foreground">{session.user.email}</p>
+        <h1 className="text-2xl font-bold">{currentUser.name}</h1>
+        <p className="text-muted-foreground">{currentUser.email}</p>
       </div>
 
       <Tabs defaultValue="submitted" className="w-full">
@@ -42,11 +43,38 @@ export default async function ProfilePage() {
         </TabsList>
 
         <TabsContent value="submitted" className="mt-6">
-          <ProfileIdeas ideas={userSubmittedIdeas} emptyMessage="You haven't submitted any ideas yet" />
+          {userSubmittedIdeas.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {userSubmittedIdeas.map((idea) => (
+                <IdeaCard
+                  key={idea.id}
+                  idea={idea}
+                  isUpvoted={upvotedIdeas.includes(idea.id)}
+                  onUpvote={handleUpvote}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 text-center">
+              <h3 className="text-xl font-medium">You haven't submitted any ideas yet</h3>
+              <p className="mt-2 text-muted-foreground">Share your first idea with the community</p>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="upvoted" className="mt-6">
-          <ProfileIdeas ideas={userVotedIdeas} emptyMessage="You haven't upvoted any ideas yet" />
+          {userLikedIdeas.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {userLikedIdeas.map((idea) => (
+                <IdeaCard key={idea.id} idea={idea} isUpvoted={true} onUpvote={handleUpvote} />
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 text-center">
+              <h3 className="text-xl font-medium">You haven't upvoted any ideas yet</h3>
+              <p className="mt-2 text-muted-foreground">Browse ideas and upvote the ones you like</p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

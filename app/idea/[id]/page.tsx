@@ -1,27 +1,39 @@
-import { notFound } from "next/navigation"
+"use client"
+
+import { useState, useEffect } from "react"
+import { notFound, useParams } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, User } from "lucide-react"
+import { ArrowLeft, ThumbsUp, User } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { getIdeaById } from "@/lib/actions"
-import { VoteButton } from "@/components/vote-button"
+import { getIdeaById, getTagsForIdea, getUserForIdea, userVotes, currentUser } from "@/lib/mock-data"
 import { Markdown } from "@/components/markdown"
 
-interface IdeaDetailPageProps {
-  params: {
-    id: string
-  }
-}
-
-export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
-  const idea = await getIdeaById(params.id)
+export default function IdeaDetailPage() {
+  const { id } = useParams<{ id: string }>()
+  const idea = getIdeaById(id)
 
   if (!idea) {
     return notFound()
   }
 
-  const user = idea.profiles
+  const tags = getTagsForIdea(idea)
+  const user = getUserForIdea(idea)
+
+  const initialUpvoteState = userVotes[currentUser.id]?.includes(id) || false
+  const [isUpvoted, setIsUpvoted] = useState(initialUpvoteState)
+  const [upvotes, setUpvotes] = useState(idea.upvotes)
+
+  useEffect(() => {
+    setIsUpvoted(userVotes[currentUser.id]?.includes(id) || false)
+  }, [id])
+
+  const handleUpvote = () => {
+    setIsUpvoted(!isUpvoted)
+    setUpvotes(isUpvoted ? upvotes - 1 : upvotes + 1)
+  }
 
   return (
     <div>
@@ -35,7 +47,10 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
         </Link>
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <h1 className="text-3xl font-bold">{idea.title}</h1>
-          <VoteButton ideaId={idea.id} />
+          <Button variant={isUpvoted ? "default" : "outline"} onClick={handleUpvote} className="w-full sm:w-auto">
+            <ThumbsUp className="mr-2 h-4 w-4" />
+            Upvote ({upvotes})
+          </Button>
         </div>
       </div>
 
@@ -43,7 +58,7 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
         <div className="lg:col-span-2">
           <div className="mb-6 overflow-hidden rounded-lg">
             <Image
-              src={idea.image_url || "/placeholder.svg?height=400&width=800"}
+              src={idea.image || "/placeholder.svg"}
               alt={idea.title}
               width={800}
               height={400}
@@ -52,7 +67,7 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
           </div>
 
           <div className="prose prose-invert max-w-none">
-            <Markdown content={idea.full_description} />
+            <Markdown content={idea.fullDescription} />
           </div>
         </div>
 
@@ -71,7 +86,7 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Tags</h4>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {idea.tags?.map((tag) => (
+                  {tags.map((tag) => (
                     <Badge key={tag.id} className={`${tag.color} text-white`}>
                       {tag.name}
                     </Badge>
@@ -82,7 +97,7 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Suggested Tech Stack</h4>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {idea.tech_stack.map((tech) => (
+                  {idea.techStack.map((tech) => (
                     <Badge key={tech} variant="secondary">
                       {tech}
                     </Badge>
@@ -98,13 +113,13 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
                   {user ? (
                     <>
                       <Image
-                        src={user.avatar_url || "/placeholder.svg?height=32&width=32"}
-                        alt={user.full_name || "User"}
+                        src={user.avatar || "/placeholder.svg"}
+                        alt={user.name}
                         width={32}
                         height={32}
                         className="rounded-full"
                       />
-                      <span className="ml-2 font-medium">{user.full_name || user.username || "Anonymous"}</span>
+                      <span className="ml-2 font-medium">{user.name}</span>
                     </>
                   ) : (
                     <>
@@ -118,7 +133,7 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Submitted on</h4>
                 <p className="mt-1">
-                  {new Date(idea.created_at).toLocaleDateString("en-US", {
+                  {new Date(idea.createdAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",

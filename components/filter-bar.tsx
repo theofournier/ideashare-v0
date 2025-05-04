@@ -1,84 +1,45 @@
 "use client"
 
 import type React from "react"
-import { useState, useTransition } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+
+import { useState } from "react"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import type { Tag, Difficulty } from "@/lib/types"
+import type { Tag, Difficulty } from "@/lib/mock-data"
 
 interface FilterBarProps {
   tags: Tag[]
+  onFilterChange: (filters: {
+    search: string
+    difficulty: Difficulty | "All"
+    tags: string[]
+  }) => void
 }
 
-export function FilterBar({ tags }: FilterBarProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
-
-  const initialSearch = searchParams.get("search") || ""
-  const initialDifficulty = (searchParams.get("difficulty") as Difficulty | "All") || "All"
-  const initialTags = searchParams.get("tags")?.split(",").filter(Boolean) || []
-
-  const [search, setSearch] = useState(initialSearch)
-  const [difficulty, setDifficulty] = useState<Difficulty | "All">(initialDifficulty)
-  const [selectedTags, setSelectedTags] = useState<string[]>(initialTags)
-
-  const createQueryString = (name: string, value: string | string[] | null) => {
-    const params = new URLSearchParams(searchParams.toString())
-
-    if (value === null || (Array.isArray(value) && value.length === 0)) {
-      params.delete(name)
-    } else if (Array.isArray(value)) {
-      params.set(name, value.join(","))
-    } else {
-      params.set(name, value)
-    }
-
-    return params.toString()
-  }
+export function FilterBar({ tags, onFilterChange }: FilterBarProps) {
+  const [search, setSearch] = useState("")
+  const [difficulty, setDifficulty] = useState<Difficulty | "All">("All")
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newSearch = e.target.value
-    setSearch(newSearch)
-
-    startTransition(() => {
-      router.push(`/?${createQueryString("search", newSearch || null)}`, { scroll: false })
-    })
+    setSearch(e.target.value)
+    onFilterChange({ search: e.target.value, difficulty, tags: selectedTags })
   }
 
   const handleDifficultyChange = (value: string) => {
     const newDifficulty = value as Difficulty | "All"
     setDifficulty(newDifficulty)
-
-    startTransition(() => {
-      router.push(`/?${createQueryString("difficulty", newDifficulty === "All" ? null : newDifficulty)}`, {
-        scroll: false,
-      })
-    })
+    onFilterChange({ search, difficulty: newDifficulty, tags: selectedTags })
   }
 
   const toggleTag = (tagId: string) => {
     const newTags = selectedTags.includes(tagId) ? selectedTags.filter((id) => id !== tagId) : [...selectedTags, tagId]
 
     setSelectedTags(newTags)
-
-    startTransition(() => {
-      router.push(`/?${createQueryString("tags", newTags.length > 0 ? newTags : null)}`, { scroll: false })
-    })
-  }
-
-  const clearFilters = () => {
-    setSearch("")
-    setDifficulty("All")
-    setSelectedTags([])
-
-    startTransition(() => {
-      router.push("/", { scroll: false })
-    })
+    onFilterChange({ search, difficulty, tags: newTags })
   }
 
   return (
@@ -111,9 +72,16 @@ export function FilterBar({ tags }: FilterBarProps) {
             {tag.name}
           </Badge>
         ))}
-        {(search || difficulty !== "All" || selectedTags.length > 0) && (
-          <Button variant="ghost" size="sm" onClick={clearFilters} disabled={isPending}>
-            Clear Filters
+        {selectedTags.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedTags([])
+              onFilterChange({ search, difficulty, tags: [] })
+            }}
+          >
+            Clear
           </Button>
         )}
       </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -9,18 +10,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
+import { tags, type Difficulty } from "@/lib/mock-data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload, X } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { useSupabase } from "@/components/supabase-provider"
-import { createIdea, getTags } from "@/lib/actions"
-import { useEffect } from "react"
-import type { Tag, Difficulty } from "@/lib/types"
 
 export default function SubmitIdeaPage() {
   const router = useRouter()
-  const { toast } = useToast()
-  const { user, isLoading: authLoading } = useSupabase()
 
   const [title, setTitle] = useState("")
   const [shortDescription, setShortDescription] = useState("")
@@ -31,29 +26,6 @@ export default function SubmitIdeaPage() {
   const [techInput, setTechInput] = useState("")
   const [imagePreview, setImagePreview] = useState("/placeholder.svg?height=200&width=300")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [tags, setTags] = useState<Tag[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    async function loadTags() {
-      const fetchedTags = await getTags()
-      setTags(fetchedTags)
-      setIsLoading(false)
-    }
-
-    loadTags()
-  }, [])
-
-  useEffect(() => {
-    // Redirect to login if not authenticated
-    if (!authLoading && !user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to submit ideas",
-      })
-      router.push("/login")
-    }
-  }, [user, authLoading, router, toast])
 
   const toggleTag = (tagId: string) => {
     setSelectedTags((prev) => (prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]))
@@ -70,44 +42,15 @@ export default function SubmitIdeaPage() {
     setTechStack(techStack.filter((t) => t !== tech))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    try {
-      const formData = new FormData()
-      formData.append("title", title)
-      formData.append("shortDescription", shortDescription)
-      formData.append("fullDescription", fullDescription)
-      formData.append("difficulty", difficulty)
-      formData.append("techStack", JSON.stringify(techStack))
-      formData.append("imageUrl", imagePreview)
-
-      selectedTags.forEach((tagId) => {
-        formData.append("tags", tagId)
-      })
-
-      await createIdea(formData)
-
-      toast({
-        title: "Success",
-        description: "Your idea has been submitted successfully!",
-      })
-
-      router.push("/")
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to submit idea. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
+    // Simulate form submission with mock data
+    setTimeout(() => {
       setIsSubmitting(false)
-    }
-  }
-
-  if (isLoading || authLoading) {
-    return <div className="flex justify-center py-12">Loading...</div>
+      router.push("/")
+    }, 1500)
   }
 
   return (
