@@ -5,13 +5,13 @@ import Image from "next/image"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ThumbsUp } from "lucide-react"
+import { Lightbulb, ThumbsUp } from "lucide-react"
 import { type Idea, type Tag, getTagById } from "@/lib/mock-data"
 
 interface IdeaCardProps {
   idea: Idea
   isUpvoted?: boolean
-  onUpvote: (id: string) => void
+  onUpvote?: (id: string) => void
 }
 
 export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
@@ -19,14 +19,20 @@ export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
 
   return (
     <Card className="h-full overflow-hidden transition-all hover:shadow-lg">
-      {idea.image && (
+      {idea.image ? (
         <CardHeader className="p-4 pb-0">
           <div className="relative h-40 w-full overflow-hidden rounded-md">
             <Image src={idea.image || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
           </div>
         </CardHeader>
+      ) : (
+        <CardHeader className="p-4 pb-0">
+          <div className="flex h-40 w-full items-center justify-center rounded-md bg-muted">
+            <Lightbulb className="h-16 w-16 text-muted-foreground/30" />
+          </div>
+        </CardHeader>
       )}
-      <CardContent className={`p-4 ${!idea.image ? "pt-6" : ""}`}>
+      <CardContent className="p-4">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex flex-wrap gap-1">
             {tags.map((tag) => (
@@ -48,7 +54,7 @@ export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
           <Button
             variant={isUpvoted ? "default" : "outline"}
             size="sm"
-            onClick={() => onUpvote(idea.id)}
+            onClick={() => onUpvote && onUpvote(idea.id)}
             className="gap-1"
           >
             <ThumbsUp className="h-4 w-4" />

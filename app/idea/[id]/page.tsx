@@ -11,6 +11,10 @@ import { Separator } from "@/components/ui/separator"
 import { getIdeaById, getTagsForIdea, getUserForIdea, userVotes, currentUser, ideas } from "@/lib/mock-data"
 import { ReportIdeaModal } from "@/components/report-idea-modal"
 import { SimilarIdeas } from "@/components/similar-ideas"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
 
 export default function IdeaDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -23,10 +27,9 @@ export default function IdeaDetailPage() {
   const tags = getTagsForIdea(idea)
   const user = getUserForIdea(idea)
 
-  const initialUpvoteState = userVotes[currentUser.id]?.includes(id) || false
-  // Initialize isUpvoted and upvotes using useState
-  const [isUpvoted, setIsUpvoted] = useState(initialUpvoteState)
-  const [upvotes, setUpvotes] = useState(idea.upvotes)
+  // Initialize state variables outside the useEffect hook
+  const [isUpvoted, setIsUpvoted] = useState(false)
+  const [upvotes, setUpvotes] = useState(0)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
 
   useEffect(() => {
@@ -63,52 +66,23 @@ export default function IdeaDetailPage() {
       // Sort by most similar first
       return bTotal - aTotal
     })
-    .slice(0, 3) // Get top 3 similar ideas
-
-  // Format the description text by replacing markdown with HTML
-  const formatDescription = (text: string) => {
-    // Remove the markdown heading syntax
-    const withoutHeadings = text.replace(/^#\s+(.*)$/gm, "<h2>$1</h2>")
-
-    // Convert bullet points
-    const withBulletPoints = withoutHeadings.replace(/^\s*-\s+(.*)$/gm, "<li>$1</li>")
-
-    // Add paragraph tags for text blocks
-    const paragraphs = withBulletPoints
-      .split("\n\n")
-      .map((p) => p.trim())
-      .filter((p) => p)
-      .map((p) => {
-        if (p.startsWith("<h2>") || p.startsWith("<li>")) {
-          return p
-        }
-        return `<p>${p}</p>`
-      })
-      .join("")
-
-    // Wrap lists in ul tags
-    const withLists = paragraphs
-      .replace(/<li>(.*?)<\/li>/g, (match) => {
-        return `<ul>${match}</ul>`
-      })
-      .replace(/<\/li><ul>/g, "</li>")
-      .replace(/<\/ul><li>/g, "<li>")
-
-    return withLists
-  }
+    .slice(0, 6) // Get top 6 similar ideas
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Link
-          href="/"
+          href="/browse"
           className="mb-4 inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
           Back to ideas
         </Link>
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <h1 className="text-3xl font-bold">{idea.title}</h1>
+          <div>
+            <h1 className="text-3xl font-bold">{idea.title}</h1>
+            <p className="mt-2 text-muted-foreground">{idea.shortDescription}</p>
+          </div>
           <div className="flex gap-2">
             <Button variant={isUpvoted ? "default" : "outline"} onClick={handleUpvote} className="w-full sm:w-auto">
               <ThumbsUp className="mr-2 h-4 w-4" />
@@ -136,8 +110,26 @@ export default function IdeaDetailPage() {
             </div>
           )}
 
-          <div className="prose prose-invert max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: formatDescription(idea.fullDescription) }} />
+          <div className="prose prose-invert dark:prose-invert max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code({ node, inline, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || "")
+                  return !inline && match ? (
+                    <SyntaxHighlighter style={vscDarkPlus} language={match[1]} PreTag="div" {...props}>
+                      {String(children).replace(/\n$/, "")}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  )
+                },
+              }}
+            >
+              {idea.fullDescription}
+            </ReactMarkdown>
           </div>
         </div>
 

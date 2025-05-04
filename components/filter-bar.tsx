@@ -26,6 +26,7 @@ export function FilterBar({ tags, techOptions = [], onFilterChange }: FilterBarP
   const [difficulty, setDifficulty] = useState<Difficulty | "All">("All")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [selectedTech, setSelectedTech] = useState<string[]>([])
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value)
@@ -117,55 +118,68 @@ export function FilterBar({ tags, techOptions = [], onFilterChange }: FilterBarP
     label: tech,
   }))
 
+  const hasActiveFilters = selectedTags.length > 0 || selectedTech.length > 0 || difficulty !== "All"
+
   return (
-    <div className="mb-6 space-y-4">
+    <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search ideas..." className="pl-8" value={search} onChange={handleSearchChange} />
         </div>
-        <Select value={difficulty} onValueChange={handleDifficultyChange}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Difficulty" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="All">All Difficulties</SelectItem>
-            <SelectItem value="Beginner">Beginner</SelectItem>
-            <SelectItem value="Intermediate">Intermediate</SelectItem>
-            <SelectItem value="Advanced">Advanced</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Select value={difficulty} onValueChange={handleDifficultyChange}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Difficulty" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All Difficulties</SelectItem>
+              <SelectItem value="Beginner">Beginner</SelectItem>
+              <SelectItem value="Intermediate">Intermediate</SelectItem>
+              <SelectItem value="Advanced">Advanced</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className="whitespace-nowrap"
+          >
+            {showAdvancedFilters ? "Hide Filters" : "More Filters"}
+          </Button>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="flex-1">
-          <Combobox
-            options={tagOptions}
-            placeholder="Select tags"
-            emptyMessage="No tags found."
-            selectedValues={selectedTags}
-            onSelect={handleTagSelect}
-            onRemove={handleTagRemove}
-            multiple={true}
-          />
-        </div>
-
-        {techOptions.length > 0 && (
+      {showAdvancedFilters && (
+        <div className="flex flex-col gap-4 sm:flex-row">
           <div className="flex-1">
             <Combobox
-              options={techStackOptions}
-              placeholder="Select tech stack"
-              emptyMessage="No technologies found."
-              selectedValues={selectedTech}
-              onSelect={handleTechSelect}
-              onRemove={handleTechRemove}
+              options={tagOptions}
+              placeholder="Select tags"
+              emptyMessage="No tags found."
+              selectedValues={selectedTags}
+              onSelect={handleTagSelect}
+              onRemove={handleTagRemove}
               multiple={true}
             />
           </div>
-        )}
-      </div>
 
-      {(selectedTags.length > 0 || selectedTech.length > 0 || difficulty !== "All") && (
+          {techOptions.length > 0 && (
+            <div className="flex-1">
+              <Combobox
+                options={techStackOptions}
+                placeholder="Select tech stack"
+                emptyMessage="No technologies found."
+                selectedValues={selectedTech}
+                onSelect={handleTechSelect}
+                onRemove={handleTechRemove}
+                multiple={true}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {hasActiveFilters && (
         <div className="flex justify-end">
           <Button variant="ghost" size="sm" onClick={handleClearFilters}>
             Clear Filters

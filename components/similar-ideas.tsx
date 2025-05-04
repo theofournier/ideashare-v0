@@ -18,7 +18,7 @@ export function SimilarIdeas({ currentIdeaId, similarIdeas }: SimilarIdeasProps)
   return (
     <div>
       <h3 className="mb-3 text-lg font-medium">Similar Ideas</h3>
-      <div className="space-y-3">
+      <div className="max-h-[350px] overflow-y-auto pr-1 space-y-3 scrollbar-thin">
         {similarIdeas.map((idea) => {
           const tags = getTagsForIdea(idea)
           return (
