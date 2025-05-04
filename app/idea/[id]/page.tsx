@@ -8,8 +8,9 @@ import { ArrowLeft, ThumbsUp, Flag, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { getIdeaById, getTagsForIdea, getUserForIdea, userVotes, currentUser } from "@/lib/mock-data"
+import { getIdeaById, getTagsForIdea, getUserForIdea, userVotes, currentUser, ideas } from "@/lib/mock-data"
 import { ReportIdeaModal } from "@/components/report-idea-modal"
+import { SimilarIdeas } from "@/components/similar-ideas"
 
 export default function IdeaDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -38,6 +39,31 @@ export default function IdeaDetailPage() {
     setIsUpvoted(!isUpvoted)
     setUpvotes(isUpvoted ? upvotes - 1 : upvotes + 1)
   }
+
+  // Find similar ideas based on tags and tech stack
+  const similarIdeas = ideas
+    .filter(
+      (otherIdea) =>
+        otherIdea.id !== id && // Not the current idea
+        // Has at least one common tag
+        (otherIdea.tags.some((tag) => idea.tags.includes(tag)) ||
+          // Has at least one common tech stack item
+          otherIdea.techStack.some((tech) => idea.techStack.includes(tech))),
+    )
+    .sort((a, b) => {
+      // Count common tags and tech stack items
+      const aCommonTags = a.tags.filter((tag) => idea.tags.includes(tag)).length
+      const aCommonTech = a.techStack.filter((tech) => idea.techStack.includes(tech)).length
+      const aTotal = aCommonTags + aCommonTech
+
+      const bCommonTags = b.tags.filter((tag) => idea.tags.includes(tag)).length
+      const bCommonTech = b.techStack.filter((tech) => idea.techStack.includes(tech)).length
+      const bTotal = bCommonTags + bCommonTech
+
+      // Sort by most similar first
+      return bTotal - aTotal
+    })
+    .slice(0, 3) // Get top 3 similar ideas
 
   // Format the description text by replacing markdown with HTML
   const formatDescription = (text: string) => {
@@ -72,7 +98,7 @@ export default function IdeaDetailPage() {
   }
 
   return (
-    <div>
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Link
           href="/"
@@ -98,15 +124,17 @@ export default function IdeaDetailPage() {
 
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <div className="mb-6 overflow-hidden rounded-lg">
-            <Image
-              src={idea.image || "/placeholder.svg"}
-              alt={idea.title}
-              width={800}
-              height={400}
-              className="w-full object-cover"
-            />
-          </div>
+          {idea.image && (
+            <div className="mb-6 overflow-hidden rounded-lg">
+              <Image
+                src={idea.image || "/placeholder.svg"}
+                alt={idea.title}
+                width={800}
+                height={400}
+                className="w-full object-cover"
+              />
+            </div>
+          )}
 
           <div className="prose prose-invert max-w-none">
             <div dangerouslySetInnerHTML={{ __html: formatDescription(idea.fullDescription) }} />
@@ -184,6 +212,13 @@ export default function IdeaDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Similar Ideas */}
+          {similarIdeas.length > 0 && (
+            <div className="rounded-lg border p-4">
+              <SimilarIdeas currentIdeaId={id} similarIdeas={similarIdeas} />
+            </div>
+          )}
         </div>
       </div>
 

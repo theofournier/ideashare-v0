@@ -19,12 +19,14 @@ export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
 
   return (
     <Card className="h-full overflow-hidden transition-all hover:shadow-lg">
-      <CardHeader className="p-4 pb-0">
-        <div className="relative h-40 w-full overflow-hidden rounded-md">
-          <Image src={idea.image || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
-        </div>
-      </CardHeader>
-      <CardContent className="p-4">
+      {idea.image && (
+        <CardHeader className="p-4 pb-0">
+          <div className="relative h-40 w-full overflow-hidden rounded-md">
+            <Image src={idea.image || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
+          </div>
+        </CardHeader>
+      )}
+      <CardContent className={`p-4 ${!idea.image ? "pt-6" : ""}`}>
         <div className="mb-2 flex items-center justify-between">
           <div className="flex flex-wrap gap-1">
             {tags.map((tag) => (

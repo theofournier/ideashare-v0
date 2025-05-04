@@ -24,7 +24,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div>
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex flex-col items-center justify-center">
         <Avatar className="mb-4 h-24 w-24">
           <AvatarImage src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.name} />

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
-import { UserCircle, PlusCircle, Home, Lightbulb, LogIn, LogOut, Settings } from "lucide-react"
+import { UserCircle, PlusCircle, Home, Lightbulb, LogIn, LogOut, Settings, Search } from "lucide-react"
 import { useState, useEffect } from "react"
 import { currentUser } from "@/lib/mock-data"
 import {
@@ -20,11 +20,13 @@ export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   // Mock authentication check
   useEffect(() => {
     // In a real app, we would check for a token or session
     setIsLoggedIn(true)
+    setMounted(true)
   }, [])
 
   const handleLogout = () => {
@@ -35,6 +37,10 @@ export default function Navbar() {
 
   // Mock admin check - in a real app, this would check if the user has admin privileges
   const isAdmin = true
+
+  if (!mounted) {
+    return null
+  }
 
   return (
     <header className="border-b">
@@ -48,6 +54,13 @@ export default function Navbar() {
             <Button variant={pathname === "/" ? "default" : "ghost"} size="sm">
               <Home className="mr-2 h-4 w-4" />
               Home
+            </Button>
+          </Link>
+
+          <Link href="/browse">
+            <Button variant={pathname === "/browse" ? "default" : "ghost"} size="sm">
+              <Search className="mr-2 h-4 w-4" />
+              Browse
             </Button>
           </Link>
 

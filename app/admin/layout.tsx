@@ -1,7 +1,7 @@
 import type React from "react"
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { LayoutDashboard, Users, Lightbulb, Settings, LogOut, Flag } from "lucide-react"
+import { LayoutDashboard, Users, Lightbulb, Settings, LogOut, Flag, Tag, Layers } from "lucide-react"
 import { currentUser } from "@/lib/mock-data"
 
 // Mock admin check - in a real app, this would check if the user has admin privileges
@@ -59,6 +59,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 <Users className="h-4 w-4" />
                 User Management
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/admin/tags"
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <Tag className="h-4 w-4" />
+                Tags Management
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/admin/tech-stacks"
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <Layers className="h-4 w-4" />
+                Tech Stacks Management
               </Link>
             </li>
             <li>

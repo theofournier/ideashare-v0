@@ -13,6 +13,11 @@ export type Tag = {
   color: string
 }
 
+export type TechStack = {
+  id: string
+  name: string
+}
+
 export type Idea = {
   id: string
   title: string
@@ -24,7 +29,7 @@ export type Idea = {
   upvotes: number
   createdAt: string
   userId: string
-  image: string
+  image?: string
 }
 
 export const users: User[] = [
@@ -51,6 +56,31 @@ export const tags: Tag[] = [
   { id: "6", name: "Productivity", color: "bg-pink-500" },
   { id: "7", name: "Education", color: "bg-indigo-500" },
   { id: "8", name: "Social", color: "bg-orange-500" },
+]
+
+export const techStacks: TechStack[] = [
+  { id: "1", name: "React" },
+  { id: "2", name: "Next.js" },
+  { id: "3", name: "Node.js" },
+  { id: "4", name: "Python" },
+  { id: "5", name: "TensorFlow" },
+  { id: "6", name: "Firebase" },
+  { id: "7", name: "MongoDB" },
+  { id: "8", name: "Express" },
+  { id: "9", name: "React Native" },
+  { id: "10", name: "Docker" },
+  { id: "11", name: "GitHub API" },
+  { id: "12", name: "Redux" },
+  { id: "13", name: "WebSockets" },
+  { id: "14", name: "Unity" },
+  { id: "15", name: "ARKit/ARCore" },
+  { id: "16", name: "TensorFlow Lite" },
+  { id: "17", name: "Swift/Kotlin" },
+  { id: "18", name: "Tailwind CSS" },
+  { id: "19", name: "Vercel" },
+  { id: "20", name: "MQTT" },
+  { id: "21", name: "TensorFlow.js" },
+  { id: "22", name: "Chart.js" },
 ]
 
 export const ideas: Idea[] = [
@@ -101,7 +131,7 @@ export const ideas: Idea[] = [
     upvotes: 38,
     createdAt: "2023-11-02",
     userId: "2",
-    image: "/placeholder.svg?height=200&width=300",
+    // No image for this idea
   },
   {
     id: "3",
@@ -218,6 +248,10 @@ export const userIdeas: Record<string, string[]> = {
 // Helper functions to work with mock data
 export function getTagById(id: string): Tag | undefined {
   return tags.find((tag) => tag.id === id)
+}
+
+export function getTechStackById(id: string): TechStack | undefined {
+  return techStacks.find((tech) => tech.id === id)
 }
 
 export function getUserById(id: string): User | undefined {
