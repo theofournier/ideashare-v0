@@ -4,11 +4,12 @@ import { useState, useEffect } from "react"
 import { notFound, useParams } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ThumbsUp, User } from "lucide-react"
+import { ArrowLeft, ThumbsUp, Flag, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { getIdeaById, getTagsForIdea, getUserForIdea, userVotes, currentUser } from "@/lib/mock-data"
+import { ReportIdeaModal } from "@/components/report-idea-modal"
 
 export default function IdeaDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -25,11 +26,13 @@ export default function IdeaDetailPage() {
   // Initialize isUpvoted and upvotes using useState
   const [isUpvoted, setIsUpvoted] = useState(initialUpvoteState)
   const [upvotes, setUpvotes] = useState(idea.upvotes)
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
 
   useEffect(() => {
     // Update isUpvoted based on userVotes when the component mounts or id changes
     setIsUpvoted(userVotes[currentUser.id]?.includes(id) || false)
-  }, [id])
+    setUpvotes(idea.upvotes) // Initialize upvotes here
+  }, [id, idea.upvotes])
 
   const handleUpvote = () => {
     setIsUpvoted(!isUpvoted)
@@ -80,10 +83,16 @@ export default function IdeaDetailPage() {
         </Link>
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <h1 className="text-3xl font-bold">{idea.title}</h1>
-          <Button variant={isUpvoted ? "default" : "outline"} onClick={handleUpvote} className="w-full sm:w-auto">
-            <ThumbsUp className="mr-2 h-4 w-4" />
-            Upvote ({upvotes})
-          </Button>
+          <div className="flex gap-2">
+            <Button variant={isUpvoted ? "default" : "outline"} onClick={handleUpvote} className="w-full sm:w-auto">
+              <ThumbsUp className="mr-2 h-4 w-4" />
+              Upvote ({upvotes})
+            </Button>
+            <Button variant="outline" size="icon" onClick={() => setIsReportModalOpen(true)} title="Report this idea">
+              <Flag className="h-4 w-4" />
+              <span className="sr-only">Report</span>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -177,6 +186,14 @@ export default function IdeaDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Report Modal */}
+      <ReportIdeaModal
+        ideaId={id}
+        ideaTitle={idea.title}
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+      />
     </div>
   )
 }

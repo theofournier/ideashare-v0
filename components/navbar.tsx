@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
-import { UserCircle, PlusCircle, Home, Lightbulb, LogIn, LogOut } from "lucide-react"
+import { UserCircle, PlusCircle, Home, Lightbulb, LogIn, LogOut, Settings } from "lucide-react"
 import { useState, useEffect } from "react"
 import { currentUser } from "@/lib/mock-data"
 import {
@@ -32,6 +32,9 @@ export default function Navbar() {
     setIsLoggedIn(false)
     router.push("/login")
   }
+
+  // Mock admin check - in a real app, this would check if the user has admin privileges
+  const isAdmin = true
 
   return (
     <header className="border-b">
@@ -74,6 +77,19 @@ export default function Navbar() {
                       Profile
                     </DropdownMenuItem>
                   </Link>
+
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <Link href="/admin">
+                        <DropdownMenuItem>
+                          <Settings className="mr-2 h-4 w-4" />
+                          Admin Panel
+                        </DropdownMenuItem>
+                      </Link>
+                    </>
+                  )}
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
