@@ -1,39 +1,27 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { notFound, useParams } from "next/navigation"
+import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ThumbsUp, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { ArrowLeft, User } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { getIdeaById, getTagsForIdea, getUserForIdea, userVotes, currentUser } from "@/lib/mock-data"
+import { getIdeaById } from "@/lib/actions"
+import { VoteButton } from "@/components/vote-button"
 import { Markdown } from "@/components/markdown"
 
-export default function IdeaDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const idea = getIdeaById(id)
+interface IdeaDetailPageProps {
+  params: {
+    id: string
+  }
+}
+
+export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
+  const idea = await getIdeaById(params.id)
 
   if (!idea) {
     return notFound()
   }
 
-  const tags = getTagsForIdea(idea)
-  const user = getUserForIdea(idea)
-
-  const initialUpvoteState = userVotes[currentUser.id]?.includes(id) || false
-  const [isUpvoted, setIsUpvoted] = useState(initialUpvoteState)
-  const [upvotes, setUpvotes] = useState(idea.upvotes)
-
-  useEffect(() => {
-    setIsUpvoted(userVotes[currentUser.id]?.includes(id) || false)
-  }, [id])
-
-  const handleUpvote = () => {
-    setIsUpvoted(!isUpvoted)
-    setUpvotes(isUpvoted ? upvotes - 1 : upvotes + 1)
-  }
+  const user = idea.profiles
 
   return (
     <div>
@@ -47,10 +35,7 @@ export default function IdeaDetailPage() {
         </Link>
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <h1 className="text-3xl font-bold">{idea.title}</h1>
-          <Button variant={isUpvoted ? "default" : "outline"} onClick={handleUpvote} className="w-full sm:w-auto">
-            <ThumbsUp className="mr-2 h-4 w-4" />
-            Upvote ({upvotes})
-          </Button>
+          <VoteButton ideaId={idea.id} />
         </div>
       </div>
 
@@ -58,7 +43,7 @@ export default function IdeaDetailPage() {
         <div className="lg:col-span-2">
           <div className="mb-6 overflow-hidden rounded-lg">
             <Image
-              src={idea.image || "/placeholder.svg"}
+              src={idea.image_url || "/placeholder.svg?height=400&width=800"}
               alt={idea.title}
               width={800}
               height={400}
@@ -67,7 +52,7 @@ export default function IdeaDetailPage() {
           </div>
 
           <div className="prose prose-invert max-w-none">
-            <Markdown content={idea.fullDescription} />
+            <Markdown content={idea.full_description} />
           </div>
         </div>
 
@@ -86,7 +71,7 @@ export default function IdeaDetailPage() {
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Tags</h4>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {tags.map((tag) => (
+                  {idea.tags?.map((tag) => (
                     <Badge key={tag.id} className={`${tag.color} text-white`}>
                       {tag.name}
                     </Badge>
@@ -97,7 +82,7 @@ export default function IdeaDetailPage() {
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Suggested Tech Stack</h4>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {idea.techStack.map((tech) => (
+                  {idea.tech_stack.map((tech) => (
                     <Badge key={tech} variant="secondary">
                       {tech}
                     </Badge>
@@ -113,13 +98,13 @@ export default function IdeaDetailPage() {
                   {user ? (
                     <>
                       <Image
-                        src={user.avatar || "/placeholder.svg"}
-                        alt={user.name}
+                        src={user.avatar_url || "/placeholder.svg?height=32&width=32"}
+                        alt={user.full_name || "User"}
                         width={32}
                         height={32}
                         className="rounded-full"
                       />
-                      <span className="ml-2 font-medium">{user.name}</span>
+                      <span className="ml-2 font-medium">{user.full_name || user.username || "Anonymous"}</span>
                     </>
                   ) : (
                     <>
@@ -133,7 +118,7 @@ export default function IdeaDetailPage() {
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Submitted on</h4>
                 <p className="mt-1">
-                  {new Date(idea.createdAt).toLocaleDateString("en-US", {
+                  {new Date(idea.created_at).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
