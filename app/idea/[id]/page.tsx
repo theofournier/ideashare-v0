@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { getIdeaById, getTagsForIdea, getUserForIdea, userVotes, currentUser } from "@/lib/mock-data"
-import { Markdown } from "@/components/markdown"
 
 export default function IdeaDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -23,16 +22,50 @@ export default function IdeaDetailPage() {
   const user = getUserForIdea(idea)
 
   const initialUpvoteState = userVotes[currentUser.id]?.includes(id) || false
+  // Initialize isUpvoted and upvotes using useState
   const [isUpvoted, setIsUpvoted] = useState(initialUpvoteState)
   const [upvotes, setUpvotes] = useState(idea.upvotes)
 
   useEffect(() => {
+    // Update isUpvoted based on userVotes when the component mounts or id changes
     setIsUpvoted(userVotes[currentUser.id]?.includes(id) || false)
   }, [id])
 
   const handleUpvote = () => {
     setIsUpvoted(!isUpvoted)
     setUpvotes(isUpvoted ? upvotes - 1 : upvotes + 1)
+  }
+
+  // Format the description text by replacing markdown with HTML
+  const formatDescription = (text: string) => {
+    // Remove the markdown heading syntax
+    const withoutHeadings = text.replace(/^#\s+(.*)$/gm, "<h2>$1</h2>")
+
+    // Convert bullet points
+    const withBulletPoints = withoutHeadings.replace(/^\s*-\s+(.*)$/gm, "<li>$1</li>")
+
+    // Add paragraph tags for text blocks
+    const paragraphs = withBulletPoints
+      .split("\n\n")
+      .map((p) => p.trim())
+      .filter((p) => p)
+      .map((p) => {
+        if (p.startsWith("<h2>") || p.startsWith("<li>")) {
+          return p
+        }
+        return `<p>${p}</p>`
+      })
+      .join("")
+
+    // Wrap lists in ul tags
+    const withLists = paragraphs
+      .replace(/<li>(.*?)<\/li>/g, (match) => {
+        return `<ul>${match}</ul>`
+      })
+      .replace(/<\/li><ul>/g, "</li>")
+      .replace(/<\/ul><li>/g, "<li>")
+
+    return withLists
   }
 
   return (
@@ -67,7 +100,7 @@ export default function IdeaDetailPage() {
           </div>
 
           <div className="prose prose-invert max-w-none">
-            <Markdown content={idea.fullDescription} />
+            <div dangerouslySetInnerHTML={{ __html: formatDescription(idea.fullDescription) }} />
           </div>
         </div>
 

@@ -1,13 +1,37 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
-import { UserCircle, PlusCircle, Home, Lightbulb } from "lucide-react"
+import { UserCircle, PlusCircle, Home, Lightbulb, LogIn, LogOut } from "lucide-react"
+import { useState, useEffect } from "react"
+import { currentUser } from "@/lib/mock-data"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  // Mock authentication check
+  useEffect(() => {
+    // In a real app, we would check for a token or session
+    setIsLoggedIn(true)
+  }, [])
+
+  const handleLogout = () => {
+    // In a real app, we would clear the token or session
+    setIsLoggedIn(false)
+    router.push("/login")
+  }
 
   return (
     <header className="border-b">
@@ -23,18 +47,50 @@ export default function Navbar() {
               Home
             </Button>
           </Link>
-          <Link href="/submit">
-            <Button variant={pathname === "/submit" ? "default" : "ghost"} size="sm">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Submit Idea
-            </Button>
-          </Link>
-          <Link href="/profile">
-            <Button variant={pathname === "/profile" ? "default" : "ghost"} size="sm">
-              <UserCircle className="mr-2 h-4 w-4" />
-              Profile
-            </Button>
-          </Link>
+
+          {isLoggedIn ? (
+            <>
+              <Link href="/submit">
+                <Button variant={pathname === "/submit" ? "default" : "ghost"} size="sm">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Submit Idea
+                </Button>
+              </Link>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.name} />
+                      <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="hidden md:inline">{currentUser.name}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <Link href="/profile">
+                    <DropdownMenuItem>
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      Profile
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <Link href="/login">
+              <Button variant={pathname === "/login" ? "default" : "ghost"} size="sm">
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+              </Button>
+            </Link>
+          )}
+
           <ModeToggle />
         </nav>
       </div>
