@@ -18,7 +18,7 @@ export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
   const tags = idea.tags.map((tagId) => getTagById(tagId)).filter(Boolean) as Tag[]
 
   return (
-    <Card className="h-full overflow-hidden transition-all hover:shadow-lg">
+    <Card className="h-full overflow-hidden transition-all hover:shadow-lg card-enhanced flex flex-col">
       {idea.image ? (
         <CardHeader className="p-4 pb-0">
           <div className="relative h-40 w-full overflow-hidden rounded-md">
@@ -32,7 +32,7 @@ export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
           </div>
         </CardHeader>
       )}
-      <CardContent className="p-4">
+      <CardContent className="p-4 flex-grow">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex flex-wrap gap-1">
             {tags.map((tag) => (
@@ -47,6 +47,21 @@ export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
           <h3 className="mb-2 text-xl font-bold hover:text-primary">{idea.title}</h3>
         </Link>
         <p className="text-sm text-muted-foreground">{idea.shortDescription}</p>
+
+        {/* Tech Stack */}
+        <div className="mt-3">
+          <p className="text-xs font-medium text-muted-foreground mb-1">Tech Stack:</p>
+          <div className="flex flex-wrap gap-1">
+            {idea.techStack.map((tech) => (
+              <span
+                key={tech}
+                className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold text-muted-foreground"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+        </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <div className="flex w-full items-center justify-between">

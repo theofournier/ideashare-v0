@@ -29,9 +29,9 @@
   .dark {
     --background: 267 53% 6%;
     --foreground: 0 0% 98%;
-    --card: 267 53% 6.5%;
+    --card: 267 40% 11%;
     --card-foreground: 0 0% 98%;
-    --popover: 267 53% 6%;
+    --popover: 267 40% 11%;
     --popover-foreground: 0 0% 98%;
     --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 210 20% 98%;
@@ -43,7 +43,7 @@
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 267 46% 12%;
+    --border: 267 30% 15%;
     --input: 267 46% 12%;
     --ring: 262.1 83.3% 57.8%;
   }
@@ -120,4 +120,13 @@
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Enhanced card styling */
+.card-enhanced {
+  @apply border border-border/40 transition-all duration-200;
+}
+
+.dark .card-enhanced {
+  @apply border-primary/10 shadow-[0_0_1px_1px_hsl(var(--primary)_/_0.05)];
 }

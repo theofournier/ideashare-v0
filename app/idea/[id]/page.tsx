@@ -20,23 +20,25 @@ export default function IdeaDetailPage() {
   const { id } = useParams<{ id: string }>()
   const idea = getIdeaById(id)
 
+  // Initialize state variables outside the conditional check
+  const [isUpvoted, setIsUpvoted] = useState(false)
+  const [upvotes, setUpvotes] = useState(0)
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+
+  useEffect(() => {
+    if (idea) {
+      // Update isUpvoted based on userVotes when the component mounts or id changes
+      setIsUpvoted(userVotes[currentUser.id]?.includes(id) || false)
+      setUpvotes(idea.upvotes) // Initialize upvotes here
+    }
+  }, [id, idea?.upvotes, idea])
+
   if (!idea) {
     return notFound()
   }
 
   const tags = getTagsForIdea(idea)
   const user = getUserForIdea(idea)
-
-  // Initialize state variables outside the useEffect hook
-  const [isUpvoted, setIsUpvoted] = useState(false)
-  const [upvotes, setUpvotes] = useState(0)
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
-
-  useEffect(() => {
-    // Update isUpvoted based on userVotes when the component mounts or id changes
-    setIsUpvoted(userVotes[currentUser.id]?.includes(id) || false)
-    setUpvotes(idea.upvotes) // Initialize upvotes here
-  }, [id, idea.upvotes])
 
   const handleUpvote = () => {
     setIsUpvoted(!isUpvoted)
@@ -99,13 +101,13 @@ export default function IdeaDetailPage() {
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           {idea.image && (
-            <div className="mb-6 overflow-hidden rounded-lg">
+            <div className="mb-6 overflow-hidden rounded-lg max-h-[400px]">
               <Image
                 src={idea.image || "/placeholder.svg"}
                 alt={idea.title}
                 width={800}
                 height={400}
-                className="w-full object-cover"
+                className="w-full object-cover h-auto max-h-[400px]"
               />
             </div>
           )}
@@ -134,7 +136,7 @@ export default function IdeaDetailPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-lg border p-4">
+          <div className="rounded-lg border p-4 card-enhanced">
             <h3 className="mb-3 text-lg font-medium">Project Details</h3>
 
             <div className="space-y-4">
@@ -207,7 +209,7 @@ export default function IdeaDetailPage() {
 
           {/* Similar Ideas */}
           {similarIdeas.length > 0 && (
-            <div className="rounded-lg border p-4">
+            <div className="rounded-lg border p-4 card-enhanced">
               <SimilarIdeas currentIdeaId={id} similarIdeas={similarIdeas} />
             </div>
           )}

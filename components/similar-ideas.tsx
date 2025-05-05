@@ -18,12 +18,12 @@ export function SimilarIdeas({ currentIdeaId, similarIdeas }: SimilarIdeasProps)
   return (
     <div>
       <h3 className="mb-3 text-lg font-medium">Similar Ideas</h3>
-      <div className="max-h-[350px] overflow-y-auto pr-1 space-y-3 scrollbar-thin">
+      <div className="max-h-[350px] overflow-y-auto pr-1 scrollbar-thin">
         {similarIdeas.map((idea) => {
           const tags = getTagsForIdea(idea)
           return (
-            <Link href={`/idea/${idea.id}`} key={idea.id}>
-              <Card className="overflow-hidden transition-all hover:bg-muted/50">
+            <Link href={`/idea/${idea.id}`} key={idea.id} className="block mb-5 last:mb-0">
+              <Card className="overflow-hidden transition-all hover:bg-muted/50 card-enhanced">
                 <CardContent className="flex p-3">
                   <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md bg-muted">
                     {idea.image ? (
