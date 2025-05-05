@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { notFound, useParams } from "next/navigation"
-import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ThumbsUp, Flag, User } from "lucide-react"
+import { ArrowLeft, ArrowUp, Flag, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -15,6 +14,8 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
+// Keep the Image import for user avatars
+import Image from "next/image"
 
 export default function IdeaDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -87,7 +88,7 @@ export default function IdeaDetailPage() {
           </div>
           <div className="flex gap-2">
             <Button variant={isUpvoted ? "default" : "outline"} onClick={handleUpvote} className="w-full sm:w-auto">
-              <ThumbsUp className="mr-2 h-4 w-4" />
+              <ArrowUp className="mr-2 h-4 w-4" />
               Upvote ({upvotes})
             </Button>
             <Button variant="outline" size="icon" onClick={() => setIsReportModalOpen(true)} title="Report this idea">
@@ -100,18 +101,6 @@ export default function IdeaDetailPage() {
 
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          {idea.image && (
-            <div className="mb-6 overflow-hidden rounded-lg max-h-[400px]">
-              <Image
-                src={idea.image || "/placeholder.svg"}
-                alt={idea.title}
-                width={800}
-                height={400}
-                className="w-full object-cover h-auto max-h-[400px]"
-              />
-            </div>
-          )}
-
           <div className="prose prose-invert dark:prose-invert max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}

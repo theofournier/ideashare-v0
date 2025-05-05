@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label"
 import { tags, type Difficulty } from "@/lib/mock-data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Upload, Eye, Edit } from "lucide-react"
+import { Eye, Edit } from "lucide-react"
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ReactMarkdown from "react-markdown"
@@ -71,7 +71,6 @@ export default function SubmitIdeaPage() {
   const [difficulty, setDifficulty] = useState<Difficulty>("Beginner")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [techStack, setTechStack] = useState<string[]>([])
-  const [imagePreview, setImagePreview] = useState("/placeholder.svg?height=200&width=300")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState("edit")
 
@@ -178,7 +177,7 @@ export default function SubmitIdeaPage() {
                             <code className="rounded bg-muted px-1 py-0.5">*Italic*</code>
                             <code className="rounded bg-muted px-1 py-0.5">[Link](url)</code>
                             <code className="rounded bg-muted px-1 py-0.5">- List item</code>
-                            <code className="rounded bg-muted px-1 py-0.5">```code```</code>
+                            <code className="rounded bg-muted px-1 py-0.5">\`\`\`code\`\`\`</code>
                           </div>
                           <Button
                             type="button"
@@ -271,23 +270,6 @@ export default function SubmitIdeaPage() {
                   onRemove={handleTechStackRemove}
                   multiple={true}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Project Image (Optional)</Label>
-                <div className="flex flex-col items-center gap-4">
-                  <div className="relative h-[200px] w-full overflow-hidden rounded-md border">
-                    <img
-                      src={imagePreview || "/placeholder.svg"}
-                      alt="Project preview"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <Button type="button" variant="outline" className="w-full">
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload Image
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>

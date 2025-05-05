@@ -29,7 +29,6 @@ export type Idea = {
   upvotes: number
   createdAt: string
   userId: string
-  image?: string
 }
 
 export const users: User[] = [
@@ -152,7 +151,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 42,
     createdAt: "2023-10-15",
     userId: "1",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "2",
@@ -177,7 +175,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 38,
     createdAt: "2023-11-02",
     userId: "2",
-    // No image for this idea
   },
   {
     id: "3",
@@ -202,7 +199,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 27,
     createdAt: "2023-12-05",
     userId: "1",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "4",
@@ -227,7 +223,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 35,
     createdAt: "2024-01-10",
     userId: "2",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "5",
@@ -252,7 +247,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 31,
     createdAt: "2024-02-18",
     userId: "1",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "6",
@@ -277,7 +271,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 29,
     createdAt: "2024-03-05",
     userId: "2",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "7",
@@ -302,7 +295,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 24,
     createdAt: "2024-03-18",
     userId: "1",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "8",
@@ -327,7 +319,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 33,
     createdAt: "2024-03-25",
     userId: "2",
-    // No image for this idea
   },
   {
     id: "9",
@@ -352,7 +343,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 19,
     createdAt: "2024-04-02",
     userId: "1",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "10",
@@ -377,7 +367,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 28,
     createdAt: "2024-04-10",
     userId: "2",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "11",
@@ -402,7 +391,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 22,
     createdAt: "2024-04-15",
     userId: "1",
-    // No image for this idea
   },
   {
     id: "12",
@@ -427,7 +415,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 37,
     createdAt: "2024-04-22",
     userId: "2",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "13",
@@ -452,7 +439,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 26,
     createdAt: "2024-04-28",
     userId: "1",
-    // No image for this idea
   },
   {
     id: "14",
@@ -477,7 +463,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 41,
     createdAt: "2024-05-05",
     userId: "2",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "15",
@@ -502,7 +487,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 32,
     createdAt: "2024-05-12",
     userId: "1",
-    image: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "16",
@@ -527,7 +511,6 @@ The initial version could focus on a single language (e.g., JavaScript) and a si
     upvotes: 29,
     createdAt: "2024-05-20",
     userId: "2",
-    // No image for this idea
   },
 ]
 

@@ -1,11 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Lightbulb, ThumbsUp } from "lucide-react"
+import { ArrowUp } from "lucide-react"
 import { type Idea, type Tag, getTagById } from "@/lib/mock-data"
 
 interface IdeaCardProps {
@@ -19,20 +18,14 @@ export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
 
   return (
     <Card className="h-full overflow-hidden transition-all hover:shadow-lg card-enhanced flex flex-col">
-      {idea.image ? (
-        <CardHeader className="p-4 pb-0">
-          <div className="relative h-40 w-full overflow-hidden rounded-md">
-            <Image src={idea.image || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
-          </div>
-        </CardHeader>
-      ) : (
-        <CardHeader className="p-4 pb-0">
-          <div className="flex h-40 w-full items-center justify-center rounded-md bg-muted">
-            <Lightbulb className="h-16 w-16 text-muted-foreground/30" />
-          </div>
-        </CardHeader>
-      )}
       <CardContent className="p-4 flex-grow">
+        {/* Title and description at the top */}
+        <Link href={`/idea/${idea.id}`}>
+          <h3 className="mb-2 text-xl font-bold hover:text-primary">{idea.title}</h3>
+        </Link>
+        <p className="text-sm text-muted-foreground mb-3">{idea.shortDescription}</p>
+
+        {/* Tags and difficulty below */}
         <div className="mb-2 flex items-center justify-between">
           <div className="flex flex-wrap gap-1">
             {tags.map((tag) => (
@@ -43,14 +36,9 @@ export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
           </div>
           <Badge variant="outline">{idea.difficulty}</Badge>
         </div>
-        <Link href={`/idea/${idea.id}`}>
-          <h3 className="mb-2 text-xl font-bold hover:text-primary">{idea.title}</h3>
-        </Link>
-        <p className="text-sm text-muted-foreground">{idea.shortDescription}</p>
 
         {/* Tech Stack */}
         <div className="mt-3">
-          <p className="text-xs font-medium text-muted-foreground mb-1">Tech Stack:</p>
           <div className="flex flex-wrap gap-1">
             {idea.techStack.map((tech) => (
               <span
@@ -72,7 +60,7 @@ export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
             onClick={() => onUpvote && onUpvote(idea.id)}
             className="gap-1"
           >
-            <ThumbsUp className="h-4 w-4" />
+            <ArrowUp className="h-4 w-4" />
             <span>{idea.upvotes}</span>
           </Button>
         </div>

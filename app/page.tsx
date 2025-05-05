@@ -5,8 +5,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRight, Lightbulb, Users, Zap, ThumbsUp, ChevronLeft, ChevronRight } from "lucide-react"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { ArrowRight, Lightbulb, Users, Zap, ArrowUp, ChevronLeft, ChevronRight } from "lucide-react"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { ideas, tags, getTagById } from "@/lib/mock-data"
 
 export default function LandingPage() {
@@ -127,20 +127,14 @@ export default function LandingPage() {
                   key={idea.id}
                   className="h-full overflow-hidden transition-all hover:shadow-md card-enhanced flex flex-col relative"
                 >
-                  {idea.image ? (
-                    <CardHeader className="p-2 pb-0">
-                      <div className="relative h-24 w-full overflow-hidden rounded-md">
-                        <Image src={idea.image || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
-                      </div>
-                    </CardHeader>
-                  ) : (
-                    <CardHeader className="p-2 pb-0">
-                      <div className="flex h-24 w-full items-center justify-center rounded-md bg-muted">
-                        <Lightbulb className="h-10 w-10 text-muted-foreground/30" />
-                      </div>
-                    </CardHeader>
-                  )}
-                  <CardContent className="p-2 flex-grow">
+                  <CardContent className="p-4 flex-grow">
+                    {/* Title and description at the top */}
+                    <Link href={`/idea/${idea.id}`}>
+                      <h3 className="mb-1 text-sm font-bold line-clamp-2 hover:text-primary">{idea.title}</h3>
+                    </Link>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{idea.shortDescription}</p>
+
+                    {/* Tags and difficulty below */}
                     <div className="mb-1 flex items-center justify-between">
                       <div className="flex flex-wrap gap-1">
                         {idea.tags.slice(0, 1).map((tagId) => {
@@ -156,10 +150,6 @@ export default function LandingPage() {
                         {idea.difficulty}
                       </Badge>
                     </div>
-                    <Link href={`/idea/${idea.id}`}>
-                      <h3 className="mb-1 text-sm font-bold line-clamp-2 hover:text-primary">{idea.title}</h3>
-                    </Link>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{idea.shortDescription}</p>
 
                     {/* Tech Stack - simplified */}
                     <div className="mt-1">
@@ -186,7 +176,7 @@ export default function LandingPage() {
                         {new Date(idea.createdAt).toLocaleDateString()}
                       </span>
                       <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <ThumbsUp className="h-2.5 w-2.5" />
+                        <ArrowUp className="h-2.5 w-2.5" />
                         <span>{idea.upvotes}</span>
                       </div>
                     </div>
@@ -271,34 +261,19 @@ export default function LandingPage() {
                       key={idea.id}
                       className="h-full overflow-hidden transition-all hover:shadow-md card-enhanced flex flex-col relative"
                     >
-                      {idea.image ? (
-                        <CardHeader className="p-2 pb-0">
-                          <div className="relative h-24 w-full overflow-hidden rounded-md">
-                            <Image
-                              src={idea.image || "/placeholder.svg"}
-                              alt={idea.title}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        </CardHeader>
-                      ) : (
-                        <CardHeader className="p-2 pb-0">
-                          <div className="flex h-24 w-full items-center justify-center rounded-md bg-muted">
-                            <Lightbulb className="h-10 w-10 text-muted-foreground/30" />
-                          </div>
-                        </CardHeader>
-                      )}
-                      <CardContent className="p-2 flex-grow">
+                      <CardContent className="p-4 flex-grow">
+                        {/* Title and description at the top */}
+                        <Link href={`/idea/${idea.id}`}>
+                          <h3 className="mb-1 text-sm font-bold line-clamp-2 hover:text-primary">{idea.title}</h3>
+                        </Link>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{idea.shortDescription}</p>
+
+                        {/* Difficulty below */}
                         <div className="mb-1 flex items-center justify-between">
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                             {idea.difficulty}
                           </Badge>
                         </div>
-                        <Link href={`/idea/${idea.id}`}>
-                          <h3 className="mb-1 text-sm font-bold line-clamp-2 hover:text-primary">{idea.title}</h3>
-                        </Link>
-                        <p className="text-xs text-muted-foreground line-clamp-2">{idea.shortDescription}</p>
 
                         {/* Tech Stack - simplified */}
                         <div className="mt-1">
@@ -325,7 +300,7 @@ export default function LandingPage() {
                             {new Date(idea.createdAt).toLocaleDateString()}
                           </span>
                           <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                            <ThumbsUp className="h-2.5 w-2.5" />
+                            <ArrowUp className="h-2.5 w-2.5" />
                             <span>{idea.upvotes}</span>
                           </div>
                         </div>
