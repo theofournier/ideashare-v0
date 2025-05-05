@@ -29,6 +29,14 @@ export default function BrowsePage() {
   const [paginatedIdeas, setPaginatedIdeas] = useState<typeof ideas>([])
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  // Add a new state for sorting at the top of the component, after the existing state declarations
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc">("newest")
+
+  // Add these state variables to track filter state
+  const [search, setSearch] = useState("")
+  const [difficulty, setDifficulty] = useState<Difficulty | "All">("All")
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedTech, setSelectedTech] = useState<string[]>([])
 
   // Check if we're on mobile
   useEffect(() => {
@@ -44,13 +52,15 @@ export default function BrowsePage() {
     return () => window.removeEventListener("resize", checkIfMobile)
   }, [])
 
+  // Update the handleFilterChange function to include sorting
   const handleFilterChange = (filters: {
     search: string
     difficulty: Difficulty | "All"
     tags: string[]
     techStack?: string[]
+    sort?: "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc"
   }) => {
-    const { search, difficulty, tags, techStack } = filters
+    const { search, difficulty, tags, techStack, sort } = filters
 
     const filtered = ideas.filter((idea) => {
       // Filter by search term
@@ -72,9 +82,43 @@ export default function BrowsePage() {
       return matchesSearch && matchesDifficulty && matchesTags && matchesTechStack
     })
 
-    setFilteredIdeas(filtered)
-    setTotalPages(Math.ceil(filtered.length / ITEMS_PER_PAGE))
+    // Apply sorting if provided
+    if (sort) {
+      setSortBy(sort)
+    }
+
+    // Sort the filtered ideas
+    const sortedIdeas = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        case "oldest":
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        case "most-upvoted":
+          return b.upvotes - a.upvotes
+        case "title-asc":
+          return a.title.localeCompare(b.title)
+        case "title-desc":
+          return b.title.localeCompare(a.title)
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      }
+    })
+
+    setFilteredIdeas(sortedIdeas)
+    setTotalPages(Math.ceil(sortedIdeas.length / ITEMS_PER_PAGE))
     setCurrentPage(1) // Reset to first page when filters change
+  }
+
+  // Add a handleSortChange function
+  const handleSortChange = (sort: "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc") => {
+    handleFilterChange({
+      search,
+      difficulty,
+      tags: selectedTags,
+      techStack: selectedTech,
+      sort,
+    })
   }
 
   // Update paginated ideas whenever filtered ideas or current page changes
@@ -144,7 +188,13 @@ export default function BrowsePage() {
 
       {/* Mobile filter bar - only shown on small screens */}
       <div className="lg:hidden sticky top-16 z-10 -mx-4 bg-background px-4 py-4 transition-shadow border-b border-border/40 backdrop-blur-sm">
-        <FilterBar tags={tags} techOptions={allTechStacks} onFilterChange={handleFilterChange} />
+        <FilterBar
+          tags={tags}
+          techOptions={allTechStacks}
+          onFilterChange={handleFilterChange}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+        />
       </div>
 
       {/* Desktop layout with sidebar */}
@@ -173,6 +223,8 @@ export default function BrowsePage() {
                   techOptions={allTechStacks}
                   onFilterChange={handleFilterChange}
                   vertical={true}
+                  sortBy={sortBy}
+                  onSortChange={handleSortChange}
                 />
               </>
             )}
@@ -181,6 +233,7 @@ export default function BrowsePage() {
 
         {/* Main content area */}
         <div className={`flex-1 ${sidebarCollapsed ? "lg:ml-4" : "lg:ml-6"}`}>
+          {/* Remove the standalone sort dropdown */}
           {filteredIdeas.length === 0 ? (
             <div className="mt-12 text-center">
               <h3 className="text-xl font-medium">No ideas match your filters</h3>

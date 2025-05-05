@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
 import type { Tag, Difficulty } from "@/lib/mock-data"
 
+// Update the FilterBarProps interface to include sort props
 interface FilterBarProps {
   tags: Tag[]
   techOptions?: string[]
@@ -18,11 +19,22 @@ interface FilterBarProps {
     difficulty: Difficulty | "All"
     tags: string[]
     techStack?: string[]
+    sort?: "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc"
   }) => void
   vertical?: boolean
+  sortBy?: "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc"
+  onSortChange?: (sort: "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc") => void
 }
 
-export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = false }: FilterBarProps) {
+// Update the FilterBar function to include the new props
+export function FilterBar({
+  tags,
+  techOptions = [],
+  onFilterChange,
+  vertical = false,
+  sortBy = "newest",
+  onSortChange,
+}: FilterBarProps) {
   const [search, setSearch] = useState("")
   const [difficulty, setDifficulty] = useState<Difficulty | "All">("All")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -36,6 +48,7 @@ export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = f
       difficulty,
       tags: selectedTags,
       techStack: selectedTech,
+      sort: sortBy,
     })
   }
 
@@ -47,6 +60,7 @@ export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = f
       difficulty: newDifficulty,
       tags: selectedTags,
       techStack: selectedTech,
+      sort: sortBy,
     })
   }
 
@@ -58,6 +72,7 @@ export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = f
       difficulty,
       tags: newTags,
       techStack: selectedTech,
+      sort: sortBy,
     })
   }
 
@@ -69,6 +84,7 @@ export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = f
       difficulty,
       tags: newTags,
       techStack: selectedTech,
+      sort: sortBy,
     })
   }
 
@@ -80,6 +96,7 @@ export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = f
       difficulty,
       tags: selectedTags,
       techStack: newTech,
+      sort: sortBy,
     })
   }
 
@@ -91,6 +108,7 @@ export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = f
       difficulty,
       tags: selectedTags,
       techStack: newTech,
+      sort: sortBy,
     })
   }
 
@@ -103,6 +121,7 @@ export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = f
       difficulty: "All",
       tags: [],
       techStack: [],
+      sort: sortBy,
     })
   }
 
@@ -121,6 +140,22 @@ export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = f
 
   const hasActiveFilters = selectedTags.length > 0 || selectedTech.length > 0 || difficulty !== "All"
 
+  // Add a handleSortChange function
+  const handleSortChange = (value: string) => {
+    const newSort = value as "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc"
+    if (onSortChange) {
+      onSortChange(newSort)
+    } else {
+      onFilterChange({
+        search,
+        difficulty,
+        tags: selectedTags,
+        techStack: selectedTech,
+        sort: newSort,
+      })
+    }
+  }
+
   return (
     <div className={`space-y-4 ${vertical ? "w-full" : ""}`}>
       <div className={`${vertical ? "flex flex-col gap-4" : "flex flex-col gap-4 sm:flex-row"}`}>
@@ -128,19 +163,55 @@ export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = f
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search ideas..." className="pl-8" value={search} onChange={handleSearchChange} />
         </div>
-        <div className={`${vertical ? "flex flex-col" : "flex"} gap-2`}>
-          <Select value={difficulty} onValueChange={handleDifficultyChange}>
-            <SelectTrigger className={`${vertical ? "w-full" : "w-full sm:w-[180px]"}`}>
-              <SelectValue placeholder="Difficulty" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All Difficulties</SelectItem>
-              <SelectItem value="Beginner">Beginner</SelectItem>
-              <SelectItem value="Intermediate">Intermediate</SelectItem>
-              <SelectItem value="Advanced">Advanced</SelectItem>
-            </SelectContent>
-          </Select>
-          {!vertical && (
+
+        {vertical ? (
+          // Vertical layout (sidebar) - Sort By above Difficulty
+          <>
+            <div className="w-full">
+              <label className="text-sm font-medium mb-1.5 block">Sort By</label>
+              <Select value={sortBy} onValueChange={handleSortChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="most-upvoted">Most Upvoted</SelectItem>
+                  <SelectItem value="title-asc">Title (A-Z)</SelectItem>
+                  <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-full">
+              <label className="text-sm font-medium mb-1.5 block">Difficulty</label>
+              <Select value={difficulty} onValueChange={handleDifficultyChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Difficulty" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Difficulties</SelectItem>
+                  <SelectItem value="Beginner">Beginner</SelectItem>
+                  <SelectItem value="Intermediate">Intermediate</SelectItem>
+                  <SelectItem value="Advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        ) : (
+          // Horizontal layout (toolbar) - Sort By next to search, Difficulty in More Filters
+          <div className="flex gap-2">
+            <Select value={sortBy} onValueChange={handleSortChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="most-upvoted">Most Upvoted</SelectItem>
+                <SelectItem value="title-asc">Title (A-Z)</SelectItem>
+                <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+              </SelectContent>
+            </Select>
             <Button
               variant="outline"
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
@@ -148,12 +219,29 @@ export function FilterBar({ tags, techOptions = [], onFilterChange, vertical = f
             >
               {showAdvancedFilters ? "Hide Filters" : "More Filters"}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {showAdvancedFilters && (
         <div className={`${vertical ? "flex flex-col gap-4" : "flex flex-col gap-4 sm:flex-row"}`}>
+          {!vertical && (
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-1.5 block">Difficulty</label>
+              <Select value={difficulty} onValueChange={handleDifficultyChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Difficulty" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Difficulties</SelectItem>
+                  <SelectItem value="Beginner">Beginner</SelectItem>
+                  <SelectItem value="Intermediate">Intermediate</SelectItem>
+                  <SelectItem value="Advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="flex-1">
             <label className="text-sm font-medium mb-1.5 block">Tags</label>
             <Combobox
