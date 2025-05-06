@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { ideas, users } from "@/lib/mock-data"
 import { reports, ideaReportCounts } from "@/lib/admin-data"
 import { Users, Lightbulb, ThumbsUp, Flag } from "lucide-react"
@@ -74,6 +74,18 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold">{pendingReports}</div>
             <p className="text-xs text-muted-foreground">Reports awaiting review</p>
           </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Seed Database</CardTitle>
+            <CardDescription>Populate the database with sample project ideas</CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Link href="/admin/seed" className="w-full">
+              <Button className="w-full">Manage</Button>
+            </Link>
+          </CardFooter>
         </Card>
       </div>
 

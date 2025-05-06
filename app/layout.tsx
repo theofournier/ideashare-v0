@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import Navbar from "@/components/navbar"
 import { Footer } from "@/components/footer"
+import { AuthProvider } from "@/lib/supabase/auth-context"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -23,14 +24,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <div className="flex min-h-screen flex-col bg-background">
-            <Navbar />
-            <main className="flex-1 py-8">{children}</main>
-            <Footer />
-            <Toaster />
-          </div>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+            <div className="flex min-h-screen flex-col bg-background">
+              <Navbar />
+              <main className="flex-1 py-8">{children}</main>
+              <Footer />
+              <Toaster />
+            </div>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )

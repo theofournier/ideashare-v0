@@ -14,7 +14,10 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useToast } from "@/hooks/use-toast"
-import type { ReportReason } from "@/lib/admin-data"
+import { reportIdea } from "@/lib/supabase/ideas"
+import { useAuth } from "@/lib/supabase/auth-context"
+
+type ReportReason = "inappropriate" | "spam" | "offensive" | "copyright" | "misinformation" | "other"
 
 interface ReportIdeaModalProps {
   ideaId: string
@@ -28,8 +31,18 @@ export function ReportIdeaModal({ ideaId, ideaTitle, isOpen, onClose }: ReportId
   const [description, setDescription] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const { user } = useAuth()
 
   const handleSubmit = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to report ideas",
+        variant: "destructive",
+      })
+      return
+    }
+
     if (!reason) {
       toast({
         title: "Error",
@@ -41,26 +54,42 @@ export function ReportIdeaModal({ ideaId, ideaTitle, isOpen, onClose }: ReportId
 
     setIsSubmitting(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      const formData = new FormData()
+      formData.append("ideaId", ideaId)
+      formData.append("reason", reason)
+      formData.append("description", description)
 
-    // In a real app, we would send this data to the server
-    console.log({
-      ideaId,
-      reason,
-      description,
-    })
+      const result = await reportIdea(formData)
 
-    setIsSubmitting(false)
-    toast({
-      title: "Report submitted",
-      description: "Thank you for helping keep our community safe.",
-    })
+      if (result.error) {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        })
+        setIsSubmitting(false)
+        return
+      }
 
-    // Reset form and close modal
-    setReason(null)
-    setDescription("")
-    onClose()
+      toast({
+        title: "Report submitted",
+        description: "Thank you for helping keep our community safe.",
+      })
+
+      // Reset form and close modal
+      setReason(null)
+      setDescription("")
+      onClose()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (

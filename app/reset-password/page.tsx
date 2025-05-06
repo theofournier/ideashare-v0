@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,16 +10,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Loader2 } from "lucide-react"
-import { signUp } from "@/lib/supabase/actions"
+import { updatePassword } from "@/lib/supabase/actions"
 
-export default function RegisterPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
+export default function ResetPasswordPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,11 +39,9 @@ export default function RegisterPage() {
     }
 
     const formData = new FormData()
-    formData.append("name", name)
-    formData.append("email", email)
     formData.append("password", password)
 
-    const result = await signUp(formData)
+    const result = await updatePassword(formData)
 
     if (result.error) {
       setError(result.error)
@@ -55,40 +49,16 @@ export default function RegisterPage() {
       return
     }
 
-    setSuccess(true)
-    setIsLoading(false)
-  }
-
-  if (success) {
-    return (
-      <div className="flex min-h-[80vh] items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Registration Successful</CardTitle>
-            <CardDescription>Your account has been created successfully.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p>
-              We've sent a confirmation email to <strong>{email}</strong>. Please check your inbox and follow the link
-              to verify your email address.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={() => router.push("/login")} className="w-full">
-              Go to Login
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    )
+    // Redirect to login page
+    router.push("/login")
   }
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl">Create an account</CardTitle>
-          <CardDescription>Enter your details to create a new account</CardDescription>
+          <CardTitle className="text-2xl">Reset your password</CardTitle>
+          <CardDescription>Enter your new password below</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -100,32 +70,7 @@ export default function RegisterPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">New Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -138,7 +83,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -150,24 +95,17 @@ export default function RegisterPage() {
             </div>
           </CardContent>
 
-          <CardFooter className="flex flex-col space-y-4">
+          <CardFooter>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
+                  Updating password...
                 </>
               ) : (
-                "Register"
+                "Reset Password"
               )}
             </Button>
-
-            <div className="text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline">
-                Login
-              </Link>
-            </div>
           </CardFooter>
         </form>
       </Card>

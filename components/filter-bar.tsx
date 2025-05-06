@@ -1,22 +1,19 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
-import { Search } from "lucide-react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
-import type { Tag, Difficulty } from "@/lib/mock-data"
+import { Badge } from "@/components/ui/badge"
+import { Search, SlidersHorizontal } from "lucide-react"
+import { MultiSelect } from "@/components/ui/multi-select"
 
-// Update the FilterBarProps interface to include sort props
 interface FilterBarProps {
-  tags: Tag[]
-  techOptions?: string[]
+  tags: { id: string; name: string; color: string }[]
+  techOptions: string[]
   onFilterChange: (filters: {
     search: string
-    difficulty: Difficulty | "All"
+    difficulty: string
     tags: string[]
     techStack?: string[]
     sort?: "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc"
@@ -24,259 +21,247 @@ interface FilterBarProps {
   vertical?: boolean
   sortBy?: "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc"
   onSortChange?: (sort: "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc") => void
+  initialSearch?: string
+  initialDifficulty?: string
+  initialTags?: string[]
+  initialTechStack?: string[]
 }
 
-// Update the FilterBar function to include the new props
 export function FilterBar({
   tags,
-  techOptions = [],
+  techOptions,
   onFilterChange,
   vertical = false,
   sortBy = "newest",
   onSortChange,
+  initialSearch = "",
+  initialDifficulty = "All",
+  initialTags = [],
+  initialTechStack = [],
 }: FilterBarProps) {
-  const [search, setSearch] = useState("")
-  const [difficulty, setDifficulty] = useState<Difficulty | "All">("All")
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [selectedTech, setSelectedTech] = useState<string[]>([])
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(vertical)
+  const [search, setSearch] = useState(initialSearch)
+  const [difficulty, setDifficulty] = useState<string>(initialDifficulty)
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialTags)
+  const [selectedTech, setSelectedTech] = useState<string[]>(initialTechStack)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value)
+  // Apply filters when they change
+  useEffect(() => {
     onFilterChange({
-      search: e.target.value,
+      search,
       difficulty,
       tags: selectedTags,
       techStack: selectedTech,
-      sort: sortBy,
     })
-  }
-
-  const handleDifficultyChange = (value: string) => {
-    const newDifficulty = value as Difficulty | "All"
-    setDifficulty(newDifficulty)
-    onFilterChange({
-      search,
-      difficulty: newDifficulty,
-      tags: selectedTags,
-      techStack: selectedTech,
-      sort: sortBy,
-    })
-  }
+  }, [search, difficulty, selectedTags, selectedTech, onFilterChange])
 
   const handleTagSelect = (tagId: string) => {
-    const newTags = [...selectedTags, tagId]
-    setSelectedTags(newTags)
-    onFilterChange({
-      search,
-      difficulty,
-      tags: newTags,
-      techStack: selectedTech,
-      sort: sortBy,
-    })
-  }
-
-  const handleTagRemove = (tagId: string) => {
-    const newTags = selectedTags.filter((id) => id !== tagId)
-    setSelectedTags(newTags)
-    onFilterChange({
-      search,
-      difficulty,
-      tags: newTags,
-      techStack: selectedTech,
-      sort: sortBy,
-    })
-  }
-
-  const handleTechSelect = (tech: string) => {
-    const newTech = [...selectedTech, tech]
-    setSelectedTech(newTech)
-    onFilterChange({
-      search,
-      difficulty,
-      tags: selectedTags,
-      techStack: newTech,
-      sort: sortBy,
-    })
-  }
-
-  const handleTechRemove = (tech: string) => {
-    const newTech = selectedTech.filter((t) => t !== tech)
-    setSelectedTech(newTech)
-    onFilterChange({
-      search,
-      difficulty,
-      tags: selectedTags,
-      techStack: newTech,
-      sort: sortBy,
-    })
-  }
-
-  const handleClearFilters = () => {
-    setSelectedTags([])
-    setSelectedTech([])
-    setDifficulty("All")
-    onFilterChange({
-      search,
-      difficulty: "All",
-      tags: [],
-      techStack: [],
-      sort: sortBy,
-    })
-  }
-
-  // Convert tags to combobox options
-  const tagOptions: ComboboxOption[] = tags.map((tag) => ({
-    value: tag.id,
-    label: tag.name,
-    color: tag.color,
-  }))
-
-  // Convert tech stack to combobox options
-  const techStackOptions: ComboboxOption[] = techOptions.map((tech) => ({
-    value: tech,
-    label: tech,
-  }))
-
-  const hasActiveFilters = selectedTags.length > 0 || selectedTech.length > 0 || difficulty !== "All"
-
-  // Add a handleSortChange function
-  const handleSortChange = (value: string) => {
-    const newSort = value as "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc"
-    if (onSortChange) {
-      onSortChange(newSort)
+    if (selectedTags.includes(tagId)) {
+      setSelectedTags(selectedTags.filter((id) => id !== tagId))
     } else {
-      onFilterChange({
-        search,
-        difficulty,
-        tags: selectedTags,
-        techStack: selectedTech,
-        sort: newSort,
-      })
+      setSelectedTags([...selectedTags, tagId])
     }
   }
 
-  return (
-    <div className={`space-y-4 ${vertical ? "w-full" : ""}`}>
-      <div className={`${vertical ? "flex flex-col gap-4" : "flex flex-col gap-4 sm:flex-row"}`}>
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search ideas..." className="pl-8" value={search} onChange={handleSearchChange} />
-        </div>
+  const handleTechSelect = (tech: string) => {
+    if (selectedTech.includes(tech)) {
+      setSelectedTech(selectedTech.filter((t) => t !== tech))
+    } else {
+      setSelectedTech([...selectedTech, tech])
+    }
+  }
 
-        {vertical ? (
-          // Vertical layout (sidebar) - Sort By above Difficulty
-          <>
-            <div className="w-full">
-              <label className="text-sm font-medium mb-1.5 block">Sort By</label>
-              <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="most-upvoted">Most Upvoted</SelectItem>
-                  <SelectItem value="title-asc">Title (A-Z)</SelectItem>
-                  <SelectItem value="title-desc">Title (Z-A)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-full">
-              <label className="text-sm font-medium mb-1.5 block">Difficulty</label>
-              <Select value={difficulty} onValueChange={handleDifficultyChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Difficulty" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All Difficulties</SelectItem>
-                  <SelectItem value="Beginner">Beginner</SelectItem>
-                  <SelectItem value="Intermediate">Intermediate</SelectItem>
-                  <SelectItem value="Advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </>
-        ) : (
-          // Horizontal layout (toolbar) - Sort By next to search, Difficulty in More Filters
-          <div className="flex gap-2">
-            <Select value={sortBy} onValueChange={handleSortChange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-                <SelectItem value="most-upvoted">Most Upvoted</SelectItem>
-                <SelectItem value="title-asc">Title (A-Z)</SelectItem>
-                <SelectItem value="title-desc">Title (Z-A)</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="whitespace-nowrap"
-            >
-              {showAdvancedFilters ? "Hide Filters" : "More Filters"}
-            </Button>
-          </div>
-        )}
-      </div>
+  const clearFilters = () => {
+    setSearch("")
+    setDifficulty("All")
+    setSelectedTags([])
+    setSelectedTech([])
+  }
 
-      {showAdvancedFilters && (
-        <div className={`${vertical ? "flex flex-col gap-4" : "flex flex-col gap-4 sm:flex-row"}`}>
-          {!vertical && (
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-1.5 block">Difficulty</label>
-              <Select value={difficulty} onValueChange={handleDifficultyChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Difficulty" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All Difficulties</SelectItem>
-                  <SelectItem value="Beginner">Beginner</SelectItem>
-                  <SelectItem value="Intermediate">Intermediate</SelectItem>
-                  <SelectItem value="Advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+  const handleSortChange = (value: string) => {
+    if (onSortChange) {
+      onSortChange(value as "newest" | "oldest" | "most-upvoted" | "title-asc" | "title-desc")
+    }
+  }
 
-          <div className="flex-1">
-            <label className="text-sm font-medium mb-1.5 block">Tags</label>
-            <Combobox
-              options={tagOptions}
-              placeholder="Select tags"
-              emptyMessage="No tags found."
-              selectedValues={selectedTags}
-              onSelect={handleTagSelect}
-              onRemove={handleTagRemove}
-              multiple={true}
+  if (vertical) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <label htmlFor="search" className="text-sm font-medium">
+            Search
+          </label>
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="search"
+              placeholder="Search ideas..."
+              className="pl-8"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+        </div>
 
-          {techOptions.length > 0 && (
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-1.5 block">Tech Stack</label>
-              <Combobox
-                options={techStackOptions}
-                placeholder="Select tech stack"
-                emptyMessage="No technologies found."
-                selectedValues={selectedTech}
-                onSelect={handleTechSelect}
-                onRemove={handleTechRemove}
-                multiple={true}
+        <div className="space-y-2">
+          <label htmlFor="sort" className="text-sm font-medium">
+            Sort By
+          </label>
+          <Select value={sortBy} onValueChange={handleSortChange}>
+            <SelectTrigger id="sort">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="most-upvoted">Most Upvoted</SelectItem>
+              <SelectItem value="title-asc">Title (A-Z)</SelectItem>
+              <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="difficulty" className="text-sm font-medium">
+            Difficulty
+          </label>
+          <Select value={difficulty} onValueChange={setDifficulty}>
+            <SelectTrigger id="difficulty">
+              <SelectValue placeholder="Select difficulty" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All Difficulties</SelectItem>
+              <SelectItem value="Beginner">Beginner</SelectItem>
+              <SelectItem value="Intermediate">Intermediate</SelectItem>
+              <SelectItem value="Advanced">Advanced</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Tags</label>
+          <div className="flex flex-wrap gap-1">
+            {tags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant={selectedTags.includes(tag.id) ? "default" : "outline"}
+                className={selectedTags.includes(tag.id) ? `${tag.color} text-white` : ""}
+                onClick={() => handleTagSelect(tag.id)}
+              >
+                {tag.name}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Tech Stack</label>
+          <MultiSelect
+            options={techOptions.map((tech) => ({ label: tech, value: tech }))}
+            selected={selectedTech}
+            onChange={setSelectedTech}
+            placeholder="Select technologies"
+          />
+        </div>
+
+        <Button variant="outline" size="sm" onClick={clearFilters} className="w-full">
+          Clear Filters
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search ideas..."
+            className="pl-8"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="flex gap-2">
+          <Select value={sortBy} onValueChange={handleSortChange}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="most-upvoted">Most Upvoted</SelectItem>
+              <SelectItem value="title-asc">Title (A-Z)</SelectItem>
+              <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            aria-label="Toggle filters"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {isFilterOpen && (
+        <div className="space-y-4 rounded-lg border p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-medium">Filters</h3>
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              Clear All
+            </Button>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label htmlFor="mobile-difficulty" className="text-sm font-medium">
+                Difficulty
+              </label>
+              <Select value={difficulty} onValueChange={setDifficulty}>
+                <SelectTrigger id="mobile-difficulty">
+                  <SelectValue placeholder="Select difficulty" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Difficulties</SelectItem>
+                  <SelectItem value="Beginner">Beginner</SelectItem>
+                  <SelectItem value="Intermediate">Intermediate</SelectItem>
+                  <SelectItem value="Advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tech Stack</label>
+              <MultiSelect
+                options={techOptions.map((tech) => ({ label: tech, value: tech }))}
+                selected={selectedTech}
+                onChange={setSelectedTech}
+                placeholder="Select technologies"
               />
             </div>
-          )}
-        </div>
-      )}
+          </div>
 
-      {hasActiveFilters && (
-        <div className={`${vertical ? "" : "flex justify-end"}`}>
-          <Button variant="ghost" size="sm" onClick={handleClearFilters}>
-            Clear Filters
-          </Button>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Tags</label>
+            <div className="flex flex-wrap gap-1">
+              {tags.map((tag) => (
+                <Badge
+                  key={tag.id}
+                  variant={selectedTags.includes(tag.id) ? "default" : "outline"}
+                  className={selectedTags.includes(tag.id) ? `${tag.color} text-white` : ""}
+                  onClick={() => handleTagSelect(tag.id)}
+                >
+                  {tag.name}
+                </Badge>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

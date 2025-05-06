@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 import { UserCircle, PlusCircle, Home, Lightbulb, LogIn, LogOut, Settings, Search } from "lucide-react"
 import { useState, useEffect } from "react"
-import { currentUser } from "@/lib/mock-data"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,30 +14,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAuth } from "@/lib/supabase/auth-context"
+import { signOut } from "@/lib/supabase/actions"
 
 export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { user, profile, isLoading } = useAuth()
   const [mounted, setMounted] = useState(false)
 
-  // Mock authentication check
+  // Ensure component is mounted to avoid hydration mismatch
   useEffect(() => {
-    // In a real app, we would check for a token or session
-    setIsLoggedIn(true)
     setMounted(true)
   }, [])
 
-  const handleLogout = () => {
-    // In a real app, we would clear the token or session
-    setIsLoggedIn(false)
-    router.push("/login")
+  const handleLogout = async () => {
+    await signOut()
   }
 
   // Mock admin check - in a real app, this would check if the user has admin privileges
-  const isAdmin = true
+  const isAdmin = user?.email?.includes("admin")
 
-  if (!mounted) {
+  if (!mounted || isLoading) {
     return null
   }
 
@@ -64,7 +61,7 @@ export default function Navbar() {
             </Button>
           </Link>
 
-          {isLoggedIn ? (
+          {user ? (
             <>
               <Link href="/submit">
                 <Button variant={pathname === "/submit" ? "default" : "ghost"} size="sm">
@@ -77,10 +74,13 @@ export default function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="gap-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.name} />
-                      <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                      <AvatarImage
+                        src={profile?.avatar_url || "/placeholder.svg"}
+                        alt={profile?.full_name || user.email || ""}
+                      />
+                      <AvatarFallback>{profile?.full_name?.[0] || user.email?.[0] || "U"}</AvatarFallback>
                     </Avatar>
-                    <span className="hidden md:inline">{currentUser.name}</span>
+                    <span className="hidden md:inline">{profile?.full_name || user.email}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
