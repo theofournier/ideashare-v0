@@ -3,11 +3,19 @@
 import { useState, useEffect } from "react"
 import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, ArrowUp, Flag, User } from "lucide-react"
+import { ArrowLeft, ArrowUp, Flag, User, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { getIdeaById, getTagsForIdea, getUserForIdea, userVotes, currentUser, ideas } from "@/lib/mock-data"
+import {
+  getIdeaById,
+  getTagsForIdea,
+  getUserForIdea,
+  userVotes,
+  currentUser,
+  ideas,
+  getUserById,
+} from "@/lib/mock-data"
 import { ReportIdeaModal } from "@/components/report-idea-modal"
 import { SimilarIdeas } from "@/components/similar-ideas"
 import ReactMarkdown from "react-markdown"
@@ -25,12 +33,19 @@ export default function IdeaDetailPage() {
   const [isUpvoted, setIsUpvoted] = useState(false)
   const [upvotes, setUpvotes] = useState(0)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+  const [canEdit, setCanEdit] = useState(false)
 
   useEffect(() => {
     if (idea) {
       // Update isUpvoted based on userVotes when the component mounts or id changes
       setIsUpvoted(userVotes[currentUser.id]?.includes(id) || false)
       setUpvotes(idea.upvotes) // Initialize upvotes here
+
+      // Check if user can edit (admin or idea owner)
+      const user = getUserById(currentUser.id)
+      const isAdmin = user?.role === "admin"
+      const isOwner = idea.userId === currentUser.id
+      setCanEdit(isAdmin || isOwner)
     }
   }, [id, idea?.upvotes, idea])
 
@@ -87,6 +102,14 @@ export default function IdeaDetailPage() {
             <p className="mt-2 text-muted-foreground">{idea.shortDescription}</p>
           </div>
           <div className="flex gap-2">
+            {canEdit && (
+              <Button variant="outline" asChild>
+                <Link href={`/idea/${id}/edit`}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </Button>
+            )}
             <Button variant={isUpvoted ? "default" : "outline"} onClick={handleUpvote} className="w-full sm:w-auto">
               <ArrowUp className="mr-2 h-4 w-4" />
               Upvote ({upvotes})

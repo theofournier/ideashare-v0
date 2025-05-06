@@ -16,10 +16,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Eye, MoreHorizontal, Pencil, Trash, Search, Flag } from "lucide-react"
+import { Eye, MoreHorizontal, Pencil, Trash, Search, Flag, Plus } from "lucide-react"
 import { extendedIdeas, type ExtendedIdea, type IdeaStatus } from "@/lib/admin-data"
 import { getUserById } from "@/lib/mock-data"
 import { useToast } from "@/hooks/use-toast"
+import Link from "next/link"
 
 export default function IdeasManagement() {
   const [ideas, setIdeas] = useState<ExtendedIdea[]>(extendedIdeas)
@@ -109,7 +110,12 @@ export default function IdeasManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Ideas Management</h1>
-        <Button>Add New Idea</Button>
+        <Button asChild>
+          <Link href="/submit">
+            <Plus className="mr-2 h-4 w-4" />
+            Add New Idea
+          </Link>
+        </Button>
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
@@ -204,7 +210,7 @@ export default function IdeasManagement() {
                           <Eye className="mr-2 h-4 w-4" />
                           View
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/admin/ideas/edit/${idea.id}`)}>
+                        <DropdownMenuItem onClick={() => router.push(`/idea/${idea.id}/edit`)}>
                           <Pencil className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
