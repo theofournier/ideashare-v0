@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Loader2 } from "lucide-react"
-import { signIn } from "@/lib/supabase/actions"
+import { users } from "@/lib/mock-data"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -25,21 +25,21 @@ export default function LoginPage() {
     setIsLoading(true)
     setError(null)
 
-    const formData = new FormData()
-    formData.append("email", email)
-    formData.append("password", password)
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    const result = await signIn(formData)
+    // Mock authentication
+    const user = users.find((user) => user.email.toLowerCase() === email.toLowerCase())
 
-    if (result.error) {
-      setError(result.error)
-      setIsLoading(false)
-      return
+    if (user && password === "password") {
+      // In a real app, we would set a cookie or token here
+      console.log("Logged in as", user.name)
+      router.push("/")
+    } else {
+      setError("Invalid email or password")
     }
 
-    // Redirect to home page on successful login
-    router.push("/")
-    router.refresh()
+    setIsLoading(false)
   }
 
   return (
@@ -86,6 +86,9 @@ export default function LoginPage() {
                 required
                 disabled={isLoading}
               />
+              <p className="text-xs text-muted-foreground">
+                For demo purposes, use any email from mock data with password &quot;password&quot;
+              </p>
             </div>
           </CardContent>
 

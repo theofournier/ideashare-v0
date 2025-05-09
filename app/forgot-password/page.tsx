@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Loader2 } from "lucide-react"
-import { resetPassword } from "@/lib/supabase/actions"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -23,17 +22,10 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
     setError(null)
 
-    const formData = new FormData()
-    formData.append("email", email)
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    const result = await resetPassword(formData)
-
-    if (result.error) {
-      setError(result.error)
-      setIsLoading(false)
-      return
-    }
-
+    // Mock success
     setSuccess(true)
     setIsLoading(false)
   }

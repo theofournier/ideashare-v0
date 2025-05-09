@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Loader2 } from "lucide-react"
-import { signUp } from "@/lib/supabase/actions"
 
 export default function RegisterPage() {
   const [name, setName] = useState("")
@@ -42,19 +41,10 @@ export default function RegisterPage() {
       return
     }
 
-    const formData = new FormData()
-    formData.append("name", name)
-    formData.append("email", email)
-    formData.append("password", password)
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    const result = await signUp(formData)
-
-    if (result.error) {
-      setError(result.error)
-      setIsLoading(false)
-      return
-    }
-
+    // Mock registration success
     setSuccess(true)
     setIsLoading(false)
   }
@@ -69,8 +59,7 @@ export default function RegisterPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p>
-              We've sent a confirmation email to <strong>{email}</strong>. Please check your inbox and follow the link
-              to verify your email address.
+              In a real application, we would send a verification email to <strong>{email}</strong>.
             </p>
           </CardContent>
           <CardFooter>

@@ -5,76 +5,16 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowUp } from "lucide-react"
-import { useState } from "react"
-import { toggleUpvote } from "@/lib/supabase/ideas"
-import { useToast } from "@/hooks/use-toast"
-import { useAuth } from "@/lib/supabase/auth-context"
-
-interface Tag {
-  id: string
-  name: string
-  color: string
-}
+import { type Idea, type Tag, getTagById } from "@/lib/mock-data"
 
 interface IdeaCardProps {
-  idea: {
-    id: string
-    title: string
-    shortDescription: string
-    difficulty: string
-    upvotes: number
-    createdAt: string
-    tags: string[]
-    techStack: string[]
-    userId: string
-  }
+  idea: Idea
   isUpvoted?: boolean
-  tags?: Tag[]
+  onUpvote?: (id: string) => void
 }
 
-export function IdeaCard({ idea, isUpvoted = false, tags = [] }: IdeaCardProps) {
-  const [upvoted, setUpvoted] = useState(isUpvoted)
-  const [upvoteCount, setUpvoteCount] = useState(idea.upvotes)
-  const { toast } = useToast()
-  const { user } = useAuth()
-
-  const handleUpvote = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to upvote ideas",
-        variant: "destructive",
-      })
-      return
-    }
-
-    try {
-      const result = await toggleUpvote(idea.id)
-
-      if (result.error) {
-        toast({
-          title: "Error",
-          description: result.error,
-          variant: "destructive",
-        })
-        return
-      }
-
-      if (result.action === "added") {
-        setUpvoted(true)
-        setUpvoteCount(upvoteCount + 1)
-      } else {
-        setUpvoted(false)
-        setUpvoteCount(upvoteCount - 1)
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update upvote",
-        variant: "destructive",
-      })
-    }
-  }
+export function IdeaCard({ idea, isUpvoted = false, onUpvote }: IdeaCardProps) {
+  const tags = idea.tags.map((tagId) => getTagById(tagId)).filter(Boolean) as Tag[]
 
   return (
     <Card className="h-full overflow-hidden transition-all hover:shadow-lg card-enhanced flex flex-col">
@@ -114,9 +54,14 @@ export function IdeaCard({ idea, isUpvoted = false, tags = [] }: IdeaCardProps) 
       <CardFooter className="p-4 pt-0">
         <div className="flex w-full items-center justify-between">
           <span className="text-sm text-muted-foreground">{new Date(idea.createdAt).toLocaleDateString()}</span>
-          <Button variant={upvoted ? "default" : "outline"} size="sm" onClick={handleUpvote} className="gap-1">
+          <Button
+            variant={isUpvoted ? "default" : "outline"}
+            size="sm"
+            onClick={() => onUpvote && onUpvote(idea.id)}
+            className="gap-1"
+          >
             <ArrowUp className="h-4 w-4" />
-            <span>{upvoteCount}</span>
+            <span>{idea.upvotes}</span>
           </Button>
         </div>
       </CardFooter>

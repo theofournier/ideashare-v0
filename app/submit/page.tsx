@@ -2,13 +2,14 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { tags, type Difficulty } from "@/lib/mock-data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Eye, Edit } from "lucide-react"
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
@@ -17,123 +18,27 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
-import { createClient } from "@/lib/supabase/client"
-import { submitIdea } from "@/lib/supabase/ideas"
-import { useToast } from "@/hooks/use-toast"
 
-export default function SubmitIdeaPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const supabase = createClient()
+// Mock tech stacks data
+const techStackOptions = [
+  { value: "React", label: "React" },
+  { value: "Next.js", label: "Next.js" },
+  { value: "Node.js", label: "Node.js" },
+  { value: "Python", label: "Python" },
+  { value: "TensorFlow", label: "TensorFlow" },
+  { value: "Django", label: "Django" },
+  { value: "Vue.js", label: "Vue.js" },
+  { value: "Angular", label: "Angular" },
+  { value: "Express", label: "Express" },
+  { value: "MongoDB", label: "MongoDB" },
+  { value: "PostgreSQL", label: "PostgreSQL" },
+  { value: "Firebase", label: "Firebase" },
+  { value: "AWS", label: "AWS" },
+  { value: "Docker", label: "Docker" },
+  { value: "Kubernetes", label: "Kubernetes" },
+]
 
-  const [title, setTitle] = useState("")
-  const [shortDescription, setShortDescription] = useState("")
-  const [fullDescription, setFullDescription] = useState("")
-  const [difficulty, setDifficulty] = useState<string>("Beginner")
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [techStack, setTechStack] = useState<string[]>([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [activeTab, setActiveTab] = useState("edit")
-
-  // State for database data
-  const [tags, setTags] = useState<ComboboxOption[]>([])
-  const [techStackOptions, setTechStackOptions] = useState<ComboboxOption[]>([])
-
-  // Fetch tags and tech stacks from Supabase
-  useEffect(() => {
-    const fetchData = async () => {
-      // Fetch tags
-      const { data: tagData } = await supabase.from("tags").select("id, name, color").order("name")
-
-      if (tagData) {
-        setTags(
-          tagData.map((tag) => ({
-            value: tag.id.toString(),
-            label: tag.name,
-            color: tag.color,
-          })),
-        )
-      }
-
-      // Fetch tech stacks
-      const { data: techData } = await supabase.from("tech_stacks").select("id, name").order("name")
-
-      if (techData) {
-        setTechStackOptions(
-          techData.map((tech) => ({
-            value: tech.name,
-            label: tech.name,
-          })),
-        )
-      }
-    }
-
-    fetchData()
-  }, [supabase])
-
-  const handleTagSelect = (tagId: string) => {
-    setSelectedTags([...selectedTags, tagId])
-  }
-
-  const handleTagRemove = (tagId: string) => {
-    setSelectedTags(selectedTags.filter((id) => id !== tagId))
-  }
-
-  const handleTechStackSelect = (tech: string) => {
-    setTechStack([...techStack, tech])
-  }
-
-  const handleTechStackRemove = (tech: string) => {
-    setTechStack(techStack.filter((t) => t !== tech))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    try {
-      const formData = new FormData()
-      formData.append("title", title)
-      formData.append("shortDescription", shortDescription)
-      formData.append("fullDescription", fullDescription)
-      formData.append("difficulty", difficulty)
-      formData.append("tags", JSON.stringify(selectedTags))
-      formData.append("techStack", JSON.stringify(techStack))
-
-      const result = await submitIdea(formData)
-
-      if (result.error) {
-        toast({
-          title: "Error",
-          description: result.error,
-          variant: "destructive",
-        })
-        setIsSubmitting(false)
-        return
-      }
-
-      toast({
-        title: "Success",
-        description: "Your idea has been submitted successfully!",
-      })
-
-      // Redirect to the idea page
-      if (result.ideaId) {
-        router.push(`/idea/${result.ideaId}`)
-      } else {
-        router.push("/browse")
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      })
-      setIsSubmitting(false)
-    }
-  }
-
-  const markdownExample = `# Project Title
+const markdownExample = `# Project Title
 
 ## Overview
 A brief introduction to your project idea.
@@ -156,6 +61,52 @@ function example() {
 ## Challenges
 Some potential challenges include...
 `
+
+export default function SubmitIdeaPage() {
+  const router = useRouter()
+
+  const [title, setTitle] = useState("")
+  const [shortDescription, setShortDescription] = useState("")
+  const [fullDescription, setFullDescription] = useState("")
+  const [difficulty, setDifficulty] = useState<Difficulty>("Beginner")
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [techStack, setTechStack] = useState<string[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [activeTab, setActiveTab] = useState("edit")
+
+  // Convert tags to combobox options
+  const tagOptions: ComboboxOption[] = tags.map((tag) => ({
+    value: tag.id,
+    label: tag.name,
+    color: tag.color,
+  }))
+
+  const handleTagSelect = (tagId: string) => {
+    setSelectedTags([...selectedTags, tagId])
+  }
+
+  const handleTagRemove = (tagId: string) => {
+    setSelectedTags(selectedTags.filter((id) => id !== tagId))
+  }
+
+  const handleTechStackSelect = (tech: string) => {
+    setTechStack([...techStack, tech])
+  }
+
+  const handleTechStackRemove = (tech: string) => {
+    setTechStack(techStack.filter((t) => t !== tech))
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    // Simulate form submission with mock data
+    setTimeout(() => {
+      setIsSubmitting(false)
+      router.push("/browse")
+    }, 1500)
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -283,7 +234,7 @@ Some potential challenges include...
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="difficulty">Difficulty Level</Label>
-                <Select value={difficulty} onValueChange={(value) => setDifficulty(value)}>
+                <Select value={difficulty} onValueChange={(value) => setDifficulty(value as Difficulty)}>
                   <SelectTrigger id="difficulty">
                     <SelectValue placeholder="Select difficulty" />
                   </SelectTrigger>
@@ -298,7 +249,7 @@ Some potential challenges include...
               <div className="space-y-2">
                 <Label>Tags</Label>
                 <Combobox
-                  options={tags}
+                  options={tagOptions}
                   placeholder="Select tags"
                   emptyMessage="No tags found."
                   selectedValues={selectedTags}
