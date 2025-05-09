@@ -3,6 +3,7 @@ export type User = {
   name: string
   email: string
   avatar: string
+  role?: "user" | "admin"
 }
 
 export type Difficulty = "Beginner" | "Intermediate" | "Advanced"
@@ -37,12 +38,14 @@ export const users: User[] = [
     name: "John Doe",
     email: "john@example.com",
     avatar: "/placeholder.svg?height=40&width=40",
+    role: "admin", // Make the current user an admin for testing
   },
   {
     id: "2",
     name: "Jane Smith",
     email: "jane@example.com",
     avatar: "/placeholder.svg?height=40&width=40",
+    role: "user",
   },
 ]
 
