@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,6 +19,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectUrl = searchParams.get("redirect")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,7 +36,13 @@ export default function LoginPage() {
     if (user && password === "password") {
       // In a real app, we would set a cookie or token here
       console.log("Logged in as", user.name)
-      router.push("/")
+
+      // Redirect to the original page if a redirect URL was provided, otherwise go to home
+      if (redirectUrl) {
+        router.push(redirectUrl)
+      } else {
+        router.push("/")
+      }
     } else {
       setError("Invalid email or password")
     }
@@ -47,7 +55,11 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>Enter your email and password to access your account</CardDescription>
+          <CardDescription>
+            {redirectUrl
+              ? "Login to continue to the page you were viewing"
+              : "Enter your email and password to access your account"}
+          </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -106,7 +118,10 @@ export default function LoginPage() {
 
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-primary hover:underline">
+              <Link
+                href={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : "/register"}
+                className="text-primary hover:underline"
+              >
                 Register
               </Link>
             </div>

@@ -16,7 +16,7 @@ import { Eye, Edit, LogIn, Lock } from "lucide-react"
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ReactMarkdown from "react-markdown"
-import remarkGfm from "remark-gfm"
+import remarkGfm from "remarkGfm"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
 
@@ -142,7 +142,7 @@ export default function SubmitIdeaPage() {
                 You need to be logged in to submit a new idea. Please log in to share your project ideas with the
                 community.
               </p>
-              <Link href="/login">
+              <Link href="/login?redirect=/submit">
                 <Button className="gap-2">
                   <LogIn className="h-4 w-4" />
                   Login to Submit

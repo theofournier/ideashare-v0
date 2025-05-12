@@ -4,13 +4,16 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Loader2 } from "lucide-react"
+
+// Mock user data (replace with a real database in production)
+const users = []
 
 export default function RegisterPage() {
   const [name, setName] = useState("")
@@ -21,6 +24,8 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectUrl = searchParams.get("redirect")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,9 +49,24 @@ export default function RegisterPage() {
     // Simulate API call delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    // Mock registration success
-    setSuccess(true)
-    setIsLoading(false)
+    // Check if email is already in use
+    const existingUser = users.find((user) => user.email.toLowerCase() === email.toLowerCase())
+
+    if (existingUser) {
+      setError("Email is already in use")
+      setIsLoading(false)
+      return
+    }
+
+    // In a real app, we would create the user account here
+    console.log("Registered new user:", { name, email })
+
+    // Redirect to the original page if a redirect URL was provided, otherwise go to home
+    if (redirectUrl) {
+      router.push(redirectUrl)
+    } else {
+      router.push("/")
+    }
   }
 
   if (success) {
@@ -153,7 +173,10 @@ export default function RegisterPage() {
 
             <div className="text-center text-sm">
               Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline">
+              <Link
+                href={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : "/login"}
+                className="text-primary hover:underline"
+              >
                 Login
               </Link>
             </div>
