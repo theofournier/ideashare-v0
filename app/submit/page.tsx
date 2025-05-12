@@ -2,8 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -11,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label"
 import { tags, type Difficulty } from "@/lib/mock-data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, Edit } from "lucide-react"
+import { Eye, Edit, LogIn, Lock } from "lucide-react"
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ReactMarkdown from "react-markdown"
@@ -73,6 +74,16 @@ export default function SubmitIdeaPage() {
   const [techStack, setTechStack] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState("edit")
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Mock authentication check
+  useEffect(() => {
+    // In a real app, we would check for a token or session
+    // For demo purposes, we're setting isLoggedIn to false to show the login message
+    setIsLoggedIn(false)
+    setMounted(true)
+  }, [])
 
   // Convert tags to combobox options
   const tagOptions: ComboboxOption[] = tags.map((tag) => ({
@@ -108,6 +119,10 @@ export default function SubmitIdeaPage() {
     }, 1500)
   }
 
+  if (!mounted) {
+    return null
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mx-auto max-w-3xl">
@@ -116,7 +131,28 @@ export default function SubmitIdeaPage() {
           <p className="text-muted-foreground">Share your tech project idea with the community</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        {!isLoggedIn ? (
+          <Card className="mb-8">
+            <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+              <div className="mb-4 rounded-full bg-primary/10 p-3">
+                <Lock className="h-6 w-6 text-primary" />
+              </div>
+              <h2 className="mb-2 text-xl font-semibold">Login Required</h2>
+              <p className="mb-4 text-muted-foreground">
+                You need to be logged in to submit a new idea. Please log in to share your project ideas with the
+                community.
+              </p>
+              <Link href="/login">
+                <Button className="gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Login to Submit
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        <form onSubmit={handleSubmit} className={`space-y-8 ${!isLoggedIn ? "opacity-60 pointer-events-none" : ""}`}>
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
